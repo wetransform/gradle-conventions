@@ -1,0 +1,26 @@
+plugins {
+  id 'groovy-gradle-plugin'
+}
+
+gradlePlugin {
+  plugins {
+    defaultSettingsPlugin {
+      id = 'to.wetransform.settings.default'
+      implementationClass = 'to.wetransform.gradle.settings.DefaultSettingsPlugin'
+    }
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  testImplementation platform("org.spockframework:spock-bom:2.2-groovy-3.0")
+  testImplementation 'org.spockframework:spock-core'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+  useJUnitPlatform()
+}
