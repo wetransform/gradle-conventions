@@ -25,6 +25,10 @@ class PluginExtension {
     setup = objectFactory.newInstance(PluginConfig, plugin)
   }
 
+  void repos(Action<RepoConfig> action) {
+    action.execute(new RepoConfig(project))
+  }
+
   void setup(Closure closure) {
     /*
      * Note: The object factory that creates this object is responsible for creating this method.
