@@ -10,6 +10,9 @@ class RepoConfig {
     this.project = project
   }
 
+  /**
+   * Add the wetransform public repository.
+   */
   void wetfPublic() {
     project.repositories {
       maven {
@@ -18,6 +21,9 @@ class RepoConfig {
     }
   }
 
+  /**
+   * Add the wetransform private repository.
+   */
   void wetfPrivate() {
     project.repositories {
       maven { // wetransform internal release repository
