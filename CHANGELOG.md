@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/wetransform/gradle-conventions/compare/v1.0.0...v1.0.1) (2025-05-09)
+
+### Bug Fixes
+
+* switch to eclipse for Java formatting ([f3df854](https://github.com/wetransform/gradle-conventions/commit/f3df854fe9a447408e2061b0a49e7a16164adfc2))
+
 ## 1.0.0 (2025-05-09)
 
 ### Features
