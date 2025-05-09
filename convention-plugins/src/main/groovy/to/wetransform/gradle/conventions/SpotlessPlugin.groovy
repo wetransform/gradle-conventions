@@ -4,17 +4,32 @@ import com.diffplug.gradle.spotless.FormatExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.gradle.api.model.ObjectFactory
+
+import javax.inject.Inject
 
 class SpotlessPlugin implements Plugin<Project> {
 
-  static LICENSE_HEADER_DEFAULT = '''/*
- * Copyright (c) $YEAR wetransform GmbH
- * All rights reserved.
- */
-'''
+  private final SpotlessConfig config
+
+  @Inject
+  SpotlessPlugin(ObjectFactory objectFactory) {
+    this(objectFactory.newInstance(SpotlessConfig))
+  }
+
+  SpotlessPlugin(SpotlessConfig config) {
+    this.config = config
+  }
 
   @Override
   void apply(Project project) {
+    config.disable.convention(false)
+    config.licenseHeader.convention(SpotlessConfig.LICENSE_HEADER_DEFAULT)
+
+    if (config.disable.get()) {
+      return
+    }
+
     project.plugins.apply('com.diffplug.spotless')
 
     EditorConfigHelper ech = new EditorConfigHelper(project.rootProject.projectDir)
@@ -125,7 +140,9 @@ class SpotlessPlugin implements Plugin<Project> {
   }
 
   def void applyLicenseHeader(FormatExtension ext, Project project) {
-    //TODO configurable?
-    ext.licenseHeader(LICENSE_HEADER_DEFAULT)
+    def header = config.licenseHeader.get()
+    if (header) {
+      ext.licenseHeader(header)
+    }
   }
 }

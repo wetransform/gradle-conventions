@@ -1,0 +1,37 @@
+plugins {
+  id('to.wetransform.semantic-release-version') version '2.1.2' apply false
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'maven-publish'
+  apply plugin: 'to.wetransform.semantic-release-version'
+
+  group = 'to.wetransform.gradle'
+
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+  }
+
+  publishing {
+    // not needed - configured by gradle-plugin plugin
+//    publications {
+//      mavenJava(MavenPublication) {
+//        from components.java
+//      }
+//    }
+
+    repositories {
+      maven {
+        url = project.version.endsWith('-SNAPSHOT') ?
+          'https://artifactory.wetransform.to/artifactory/libs-snapshot-local' :
+          'https://artifactory.wetransform.to/artifactory/libs-release-local'
+        credentials {
+          username project.hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : ''
+          password project.hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
+        }
+      }
+    }
+  }
+}

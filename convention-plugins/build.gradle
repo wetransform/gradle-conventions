@@ -1,38 +1,19 @@
 plugins {
   id 'groovy-gradle-plugin'
-  id 'maven-publish'
-
-  id('com.diffplug.spotless') version '7.0.3'
-  id('to.wetransform.semantic-release-version') version '2.1.2'
 }
-
-group = 'to.wetransform'
 
 gradlePlugin {
   plugins {
+    conventionsPlugin {
+      id = 'to.wetransform.conventions'
+      implementationClass = 'to.wetransform.gradle.conventions.WetransformPlugin'
+    }
+
     spotlessPlugin {
       id = 'to.wetransform.conventions.spotless'
       implementationClass = 'to.wetransform.gradle.conventions.SpotlessPlugin'
     }
   }
-}
-
-publishing {
-    repositories {
-        maven {
-            // change to point to your repo, e.g. http://my.org/repo
-            url = layout.buildDirectory.dir('repo')
-        }
-    }
-}
-
-tasks.named('publish') {
-  dependsOn('check')
-}
-
-
-repositories {
-  gradlePluginPortal() // so that external plugins can be resolved in dependencies section
 }
 
 dependencies {
@@ -41,9 +22,11 @@ dependencies {
 
   implementation 'org.ec4j.core:ec4j-core:1.1.0'
 
-  // implementation 'com.gradleup.shadow:shadow-gradle-plugin:8.3.6'
+  implementation 'com.bmuschko:gradle-docker-plugin:9.4.0'
 
-  // implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+  implementation 'org.ajoberstar.grgit:grgit-gradle:5.3.0'
+
+  // implementation 'com.gradleup.shadow:shadow-gradle-plugin:8.3.6'
 }
 
 dependencies {
@@ -52,7 +35,6 @@ dependencies {
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test', Test) {
+test {
   useJUnitPlatform()
 }
-
