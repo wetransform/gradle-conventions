@@ -100,7 +100,7 @@ class PublishPlugin implements Plugin<Project> {
           pom {
             scm { // add SCM info - required for changelogs in Renovate
               url = config.sourceUrl.get()
-              def scmUrl = 'scm:git:git@github.com:${config.repoOwner.get()}/${config.repoName.get()}.git'
+              def scmUrl = "scm:git:git@github.com:${config.repoOwner.get()}/${config.repoName.get()}.git"
               connection = scmUrl
               developerConnection = scmUrl
             }
