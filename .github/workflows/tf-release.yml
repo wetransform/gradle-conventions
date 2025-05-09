@@ -1,0 +1,31 @@
+---
+#
+# PLEASE NOTE: Managed workflow - do not change manually
+#
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        type: boolean
+        description: "Dry-Run"
+        default: false
+
+concurrency:
+  # only run one publishing at a time to avoid conflicts
+  group: publish-${{ github.ref }}
+
+jobs:
+  publish:
+    # Only on main repository (don't release on forks)
+    if: github.repository_owner == 'wetransform'
+
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@96342025ed9dc3fa405b3f528043e88b6c0789f9 # v3.4.3
+    with:
+      semantic-release-dryrun: ${{ inputs.dryRun }}
+      java-version: 17
+      multi-module: true
+      semantic-release: true
+      skip-scan: true
+    secrets: inherit
