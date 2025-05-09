@@ -1,0 +1,28 @@
+---
+#
+# PLEASE NOTE: Managed workflow - do not change manually
+#
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch: {}
+
+concurrency:
+  # only run one publishing at a time to avoid conflicts
+  group: publish-${{ github.ref }}
+
+jobs:
+  publish:
+    # Only on main repository (don't publish on forks)
+    if: github.repository_owner == 'wetransform'
+
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@96342025ed9dc3fa405b3f528043e88b6c0789f9 # v3.4.3
+    with:
+      java-version: 17
+      multi-module: true
+      semantic-release: false
+      skip-scan: true
+    secrets: inherit
