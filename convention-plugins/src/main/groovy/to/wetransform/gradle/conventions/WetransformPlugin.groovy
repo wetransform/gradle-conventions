@@ -71,5 +71,10 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
         }
       }
     }
+
+    project.configurations.configureEach {
+      // ensure SNAPSHOTs are updated every time if needed
+      it.resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
   }
 }
