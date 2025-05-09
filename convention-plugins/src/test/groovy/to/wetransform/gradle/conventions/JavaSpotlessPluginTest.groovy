@@ -79,4 +79,34 @@ class JavaSpotlessPluginTest extends PluginTest {
     result.task(":spotlessJavaCheck").outcome == TaskOutcome.SUCCESS
   }
 
+  def "succeeds for correct Java formatting 2 spaces"() {
+    given:
+    new File(testProjectDir, '.editorconfig') << """
+    root = true
+
+    [*.java]
+    indent_style = space
+    indent_size = 2
+    """.stripIndent()
+
+    new File(testProjectDir, 'src/main/java').mkdirs()
+    new File(testProjectDir, 'src/main/java/Test.java') << """\
+    /*
+     * Copyright (c) 2025 wetransform GmbH
+     * All rights reserved.
+     */
+    public class Test {
+      public static void main(String[] args) {
+        System.out.println("Indentation correct");
+      }
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('spotlessCheck')
+
+    then:
+    result.task(":spotlessJavaCheck").outcome == TaskOutcome.SUCCESS
+  }
+
 }

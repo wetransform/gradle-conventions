@@ -83,7 +83,7 @@ class SpotlessPlugin implements Plugin<Project> {
         spotless.java {
           toggleOffOn()
 
-          palantirJavaFormat()
+          eclipse()
 
           importOrder('java', 'javax', 'org', 'com', '')
 
