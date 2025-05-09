@@ -22,4 +22,8 @@ class PluginConfig {
   void publish(Action<PublishConfig> action) {
     action.execute(configProvider.publishConfig)
   }
+
+  void javaVersion(def version) {
+    configProvider.javaVersion.set(version as String)
+  }
 }
