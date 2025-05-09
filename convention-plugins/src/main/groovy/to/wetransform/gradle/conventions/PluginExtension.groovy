@@ -53,6 +53,8 @@ class PluginExtension {
   }
 
   void setup() {
+    plugin.setup(project)
+
     def spotless = new SpotlessPlugin(plugin.spotlessConfig)
     spotless.apply(project)
 

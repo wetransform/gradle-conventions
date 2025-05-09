@@ -1,9 +1,13 @@
 package to.wetransform.gradle.conventions
 
 import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.provider.Property
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 
 import javax.inject.Inject
 
@@ -14,6 +18,8 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
   private final PublishConfig publishConfig
 
+  private final Property<String> javaVersion
+
   private final ObjectFactory objectFactory
 
   @Inject
@@ -22,6 +28,7 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
     this.spotlessConfig = objectFactory.newInstance(SpotlessConfig)
     this.publishConfig = objectFactory.newInstance(PublishConfig)
+    this.javaVersion = objectFactory.property(String)
   }
 
   @Override
@@ -38,5 +45,31 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
   @Override
   PublishConfig getPublishConfig() {
     return publishConfig
+  }
+
+  @Override
+  Property<String> getJavaVersion() {
+    return javaVersion
+  }
+
+  @CompileStatic(TypeCheckingMode.SKIP) // skip because Kotlin extension type is not available at compile time
+  def void setup(Project project) {
+    def hasJava = project.plugins.hasPlugin('java')
+    def hasKotlin = project.plugins.hasPlugin('org.jetbrains.kotlin.jvm')
+
+    if (javaVersion.isPresent()) {
+      if (hasJava) {
+        project.extensions.configure(JavaPluginExtension) { java ->
+          java.toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.get()))
+        }
+      }
+
+      if (hasKotlin) {
+        // org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+        project.extensions.configure('kotlin') { kotlin ->
+          kotlin.jvmToolChain.languageVersion.set(JavaLanguageVersion.of(javaVersion.get()))
+        }
+      }
+    }
   }
 }
