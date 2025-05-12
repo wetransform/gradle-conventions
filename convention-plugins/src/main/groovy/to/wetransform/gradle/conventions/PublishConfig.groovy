@@ -11,7 +11,7 @@ interface PublishConfig {
   /**
    * @return <code>true</code> if the project should be published to to a private repository, which is the default
    */
-  Property<Boolean> getPrivate()
+  Property<Boolean> getPrivateRepo()
   /**
    * Set to manually enable Maven publishing.
    */
