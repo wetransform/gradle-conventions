@@ -43,7 +43,7 @@ class PublishPlugin implements Plugin<Project> {
 
     config.enableDocker.convention(hasDockerPlugin || isBaseImageSet)
 
-    config.private.convention(true)
+    config.privateRepo.convention(true)
 
     config.repoOwner.convention("wetransform")
     config.repoName.convention(target.rootProject.name)
@@ -115,7 +115,7 @@ class PublishPlugin implements Plugin<Project> {
 
       repositories {
         maven {
-          def prefix = config.private.get() ? 'private' : 'libs'
+          def prefix = config.privateRepo.get() ? 'private' : 'libs'
           url = project.uri(
             "https://artifactory.wetransform.to/artifactory/" +
               (project.version.toString().endsWith('-SNAPSHOT') ? "${prefix}-snapshot-local" : "${prefix}-release-local")
