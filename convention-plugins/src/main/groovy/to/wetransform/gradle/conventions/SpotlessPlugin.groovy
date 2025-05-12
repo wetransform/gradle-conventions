@@ -38,10 +38,10 @@ class SpotlessPlugin implements Plugin<Project> {
       def gradleConfig = ech.getEditorConfigInfo(new File(project.projectDir, 'build.gradle'))
 
       spotless.groovyGradle {
-        target '*.gradle'
-        greclipse()/*.configProperties(
-          ResourceUtil.getResourceAsString('gradle-format.properties')
-        )*/
+        it.target '*.gradle'
+        it.greclipse().configProperties(
+          EclipseFormatProperties.getPropertiesAsString(gradleConfig, true)
+        )
 
         applyGenericSettings(it, gradleConfig)
       }
@@ -62,15 +62,15 @@ class SpotlessPlugin implements Plugin<Project> {
         def groovyConfig = ech.getEditorConfigInfo(new File(project.projectDir, 'src/main/groovy/test.groovy'))
 
         spotless.groovy {
-          toggleOffOn()
+          it.toggleOffOn()
 
-          importOrder('groovy', 'java', 'javax', 'org', 'com', '')
+          it.importOrder('groovy', 'java', 'javax', 'org', 'com', '')
 
           // https://github.com/diffplug/spotless/tree/main/plugin-gradle#eclipse-groovy
-          greclipse()
+          it.greclipse().configProperties(EclipseFormatProperties.getPropertiesAsString(groovyConfig, true))
 
           // excludes all Java sources within the Groovy source dirs from formatting
-          excludeJava()
+          it.excludeJava()
 
           applyLicenseHeader(it, project)
           applyGenericSettings(it, groovyConfig)
@@ -81,19 +81,21 @@ class SpotlessPlugin implements Plugin<Project> {
         def javaConfig = ech.getEditorConfigInfo(new File(project.projectDir, 'src/main/java/test.java'))
 
         spotless.java {
-          toggleOffOn()
+          it.toggleOffOn()
 
-          eclipse()
+          it.eclipse().configProperties(
+            EclipseFormatProperties.getPropertiesAsString(javaConfig, false)
+          )
 
-          importOrder('java', 'javax', 'org', 'com', '')
+          it.importOrder('java', 'javax', 'org', 'com', '')
 
-          removeUnusedImports()
+          it.removeUnusedImports()
 
           applyLicenseHeader(it, project)
           applyGenericSettings(it, javaConfig)
 
           // ignore generated files
-          targetExclude 'src-gen*/**', 'build/**'
+          it.targetExclude 'src-gen*/**', 'build/**'
         }
       }
 
@@ -106,9 +108,9 @@ class SpotlessPlugin implements Plugin<Project> {
 
           def ecFile = project.rootProject.file('.editorconfig')
           if (ecFile.exists()) {
-            ktlint().setEditorConfigPath(ecFile)
+            it.ktlint().setEditorConfigPath(ecFile)
           } else {
-            ktlint()
+            it.ktlint()
 
             applyGenericSettings(it, kotlinConfig)
           }
