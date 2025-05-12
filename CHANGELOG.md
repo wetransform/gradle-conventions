@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/wetransform/gradle-conventions/compare/v1.2.0...v1.3.0) (2025-05-12)
+
+### Features
+
+* support generating spotless script and file watcher config ([7c0624d](https://github.com/wetransform/gradle-conventions/commit/7c0624df7691bf3dffab39cb3deacacabd90527b))
+
 ## [1.2.0](https://github.com/wetransform/gradle-conventions/compare/v1.1.0...v1.2.0) (2025-05-12)
 
 ### Features
