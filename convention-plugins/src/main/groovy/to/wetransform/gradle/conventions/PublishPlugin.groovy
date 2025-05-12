@@ -57,6 +57,8 @@ class PublishPlugin implements Plugin<Project> {
 
     config.imageName.convention("wetransform/${target.rootProject.name}")
 
+    config.skipDefineMavenPublication.convention(false)
+
     // enable semantic versioning plugin
     target.plugins.apply('to.wetransform.semantic-release-version')
 
@@ -93,16 +95,18 @@ class PublishPlugin implements Plugin<Project> {
     // Configure publishing
     project.publishing {
       publications {
-        library(MavenPublication) {
-          from(project.components.java)
-          artifact(project.tasks.named('sourcesJar').get())
+        if (!config.skipDefineMavenPublication.get()) {
+          library(MavenPublication) {
+            from(project.components.java)
+            artifact(project.tasks.named('sourcesJar').get())
 
-          pom {
-            scm { // add SCM info - required for changelogs in Renovate
-              url = config.sourceUrl.get()
-              def scmUrl = "scm:git:git@github.com:${config.repoOwner.get()}/${config.repoName.get()}.git"
-              connection = scmUrl
-              developerConnection = scmUrl
+            pom {
+              scm { // add SCM info - required for changelogs in Renovate
+                url = config.sourceUrl.get()
+                def scmUrl = "scm:git:git@github.com:${config.repoOwner.get()}/${config.repoName.get()}.git"
+                connection = scmUrl
+                developerConnection = scmUrl
+              }
             }
           }
         }
