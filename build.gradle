@@ -1,5 +1,5 @@
 plugins {
-  id('to.wetransform.conventions') version '1.1.0'
+  id('to.wetransform.conventions') version '1.2.0-SNAPSHOT'
 }
 
 subprojects {
@@ -13,11 +13,10 @@ subprojects {
     setup {
       javaVersion(17)
 
-      spotless {
-        disable = true
-      }
-
       publish {
+        // publish to public repo
+        privateRepo = false
+
         // MavenPublication seems to be defined by gradle-plugin plugins already
         skipDefineMavenPublication = true
       }
