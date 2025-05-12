@@ -124,6 +124,8 @@ class SpotlessPlugin implements Plugin<Project> {
         }
       }
     }
+
+    setupTasks(project)
   }
 
   void applyGenericSettings(FormatExtension ext, EditorConfigInfo config) {
@@ -150,6 +152,59 @@ class SpotlessPlugin implements Plugin<Project> {
     def header = config.licenseHeader.get()
     if (header) {
       ext.licenseHeader(header)
+    }
+  }
+
+  void setupTasks(Project project) {
+    project.tasks.register('generateSpotlessScript') {
+      it.description = 'Generates a script to run spotless in the root project'
+
+      it.doLast {
+        // create spotless.sh script
+        def targetFile = project.rootProject.file('spotless.sh')
+        copyResourceToFile('/spotless.sh', targetFile)
+
+        // automatically create the .idea/watcherTasks.xml file
+        def ideaFolder = project.rootProject.file('.idea')
+        if (ideaFolder.exists()) {
+          def ideaFile = new File(ideaFolder, 'watcherTasks.xml')
+          if (!ideaFile.exists()) {
+            copyResourceToFile('/watcherTasks.xml', ideaFile)
+          }
+          else {
+            project.logger.warn("File ${ideaFile} already exists. Skipping creation.")
+          }
+        }
+      }
+    }
+
+    project.tasks.register('generateSpotlessWatcher') {
+      it.description = 'Generates a configuration for the IntelliJ file watcher plugin to run spotless.sh (overrides .idea/watcherTasks.xml)'
+
+      it.doLast {
+        def ideaFolder = project.rootProject.file('.idea')
+        ideaFolder.mkdirs()
+        def ideaFile = new File(ideaFolder, 'watcherTasks.xml')
+        copyResourceToFile('/watcherTasks.xml', ideaFile)
+      }
+    }
+  }
+
+  void copyResourceToFile(String resourcePath, File targetFile) throws IOException {
+    def resource = getClass().getResourceAsStream(resourcePath)
+    try {
+      if (resource) {
+        targetFile.withOutputStream { out ->
+          out << resource
+        }
+
+        // make the script executable for all
+        targetFile.setExecutable(true, false)
+      } else {
+        throw new IllegalStateException("Resource not found: ${resourcePath}")
+      }
+    } finally {
+      resource?.close()
     }
   }
 }

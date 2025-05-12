@@ -114,6 +114,52 @@ wetransform {
 }
 ```
 
+#### General use of spotless
+
+To check if the rules are met run:
+
+```bash
+./gradlew spotlessCheck
+```
+
+To automatically format the code run:
+
+```bash
+./gradlew spotlessApply
+```
+
+You can run the task `generateSpotlessScript` to generate a script that can be used to run apply the formatting:
+
+```bash
+./spotless.sh
+```
+
+You can also format a single file using the script:
+
+```bash
+./spotless.sh <file>
+```
+
+#### Integration in IntellJ
+
+There are different ways to integrate the formatting into IntelliJ:
+
+1. Add a file watcher (requires file watchers plugin) to run spotless for individual changed files **(recommended)**, this requires the generated `spotless.sh` script
+2. Manually run the Gradle task `spotlessApply` in the root project from the UI to format all files
+3. Automatically run `spotlessApply` before building (right click on Gradle task in UI, select respective option)
+4. Add the call to Gradle as external tool and assign a key binding (Settings -> Tools -> External tools; Settings -> Keymap)
+
+**Related to Option 1:**
+
+You can use the `generateSpotlessWatcher` task to generate a file watcher configuration for IntelliJ (`.idea/watcherTasks.xml`).
+Be careful, this will overwrite the existing file watcher configuration.
+This file contains the configuration for the file watcher.
+If you have the plugin installed, it will automatically pick up the configuration and run the `spotless.sh` script when a file is changed.
+
+For more information on how to set up the file watcher, see the documentation in the generated `spotless.sh` script.
+
+When generating the `spotless.sh` script using the `generateSpotlessScript` task, if a `.idea` folder is present, a `watcherTasks.xml` file is generated automatically, if it is not already present.
+
 ### Configure publishing
 
 For an overview on all available publishing options, see [PublishConfig](./convention-plugins/src/main/groovy/to/wetransform/gradle/conventions/PublishConfig.groovy).

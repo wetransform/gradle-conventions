@@ -53,4 +53,15 @@ class SpotlessPluginTest extends PluginTest {
     result.task(":spotlessGroovyGradleCheck").outcome == TaskOutcome.SUCCESS
     !result.output.contains('test.gradle')
   }
+
+  def "generates script to run spotless"() {
+    when:
+    def result = runTask('generateSpotlessScript')
+
+    then:
+    result.task(":generateSpotlessScript").outcome == TaskOutcome.SUCCESS
+    def scriptFile = new File(testProjectDir, 'spotless.sh')
+    scriptFile.exists()
+    scriptFile.text.contains('spotlessApply')
+  }
 }
