@@ -62,8 +62,9 @@ class PublishPlugin implements Plugin<Project> {
     // enable semantic versioning plugin
     target.plugins.apply('to.wetransform.semantic-release-version')
 
-    // set group
-    if (!target.group) {
+    // set group only when not already set
+    // by default the value seems to be the root project name
+    if (!target.group || target.group == target.rootProject.name) {
       target.group = config.group.get()
     }
 
