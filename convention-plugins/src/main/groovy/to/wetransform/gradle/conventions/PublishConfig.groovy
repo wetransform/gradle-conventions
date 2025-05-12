@@ -22,6 +22,12 @@ interface PublishConfig {
   Property<Boolean> getEnableDocker()
 
   /**
+   * Skip defining the MavenPublication, but still publish the artifact.
+   * Intended for cases where the MavenPublication is intended to be defined in a different way or is already defined.
+   */
+  Property<Boolean> getSkipDefineMavenPublication()
+
+  /**
    * The URL pointing to the source code of the project, by default derived from repo owner and repo name.
    */
   Property<String> getSourceUrl()
