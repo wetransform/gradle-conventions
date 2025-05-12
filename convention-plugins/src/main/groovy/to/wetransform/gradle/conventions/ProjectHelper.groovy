@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import groovy.transform.CompileStatic
+
 import org.gradle.api.Project
 
 @CompileStatic
@@ -21,5 +26,4 @@ class ProjectHelper {
   static boolean hasFolder(Project project, String folder) {
     return project.file(folder).exists()
   }
-
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.settings
 
 import org.gradle.testkit.runner.TaskOutcome

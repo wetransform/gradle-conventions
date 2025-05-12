@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import org.gradle.testkit.runner.TaskOutcome
@@ -78,5 +82,4 @@ class GroovySpotlessPluginTest extends PluginTest {
     then:
     result.task(":spotlessGroovyCheck").outcome == TaskOutcome.SUCCESS
   }
-
 }

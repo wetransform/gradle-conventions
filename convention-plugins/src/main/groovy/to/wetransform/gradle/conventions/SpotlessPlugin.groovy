@@ -1,12 +1,17 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
-import com.diffplug.gradle.spotless.FormatExtension
+import javax.inject.Inject
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import com.diffplug.gradle.spotless.SpotlessExtension
 import org.gradle.api.model.ObjectFactory
 
-import javax.inject.Inject
+import com.diffplug.gradle.spotless.FormatExtension
+import com.diffplug.gradle.spotless.SpotlessExtension
 
 class SpotlessPlugin implements Plugin<Project> {
 
@@ -41,7 +46,7 @@ class SpotlessPlugin implements Plugin<Project> {
         it.target '*.gradle'
         it.greclipse().configProperties(
           EclipseFormatProperties.getPropertiesAsString(gradleConfig, true)
-        )
+          )
 
         applyGenericSettings(it, gradleConfig)
       }
@@ -85,7 +90,7 @@ class SpotlessPlugin implements Plugin<Project> {
 
           it.eclipse().configProperties(
             EclipseFormatProperties.getPropertiesAsString(javaConfig, false)
-          )
+            )
 
           it.importOrder('java', 'javax', 'org', 'com', '')
 

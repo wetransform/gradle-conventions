@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import groovy.transform.CompileStatic
+
 import org.gradle.api.provider.Property
 
 @CompileStatic
