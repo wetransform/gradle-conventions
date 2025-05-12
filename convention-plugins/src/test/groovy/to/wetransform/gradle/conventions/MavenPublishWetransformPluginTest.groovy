@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import groovy.xml.XmlSlurper
+
 import org.gradle.testkit.runner.TaskOutcome
 
 class MavenPublishWetransformPluginTest extends PluginTest {
@@ -45,5 +50,4 @@ class MavenPublishWetransformPluginTest extends PluginTest {
     def pom = new XmlSlurper().parse(pomFile)
     assert pom.scm.url.text() == "https://github.com/wetransform/test", "SCM URL in POM is incorrect"
   }
-
 }

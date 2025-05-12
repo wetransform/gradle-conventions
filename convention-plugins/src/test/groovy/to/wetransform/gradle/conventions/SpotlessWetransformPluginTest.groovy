@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import org.gradle.testkit.runner.TaskOutcome
@@ -84,5 +88,4 @@ class SpotlessWetransformPluginTest extends PluginTest {
     then:
     result.task(":spotlessJavaCheck").outcome == TaskOutcome.SUCCESS
   }
-
 }

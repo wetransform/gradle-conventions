@@ -1,11 +1,15 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions;
-
-import org.ec4j.core.*;
-import org.ec4j.core.model.PropertyType;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
+import org.ec4j.core.*;
+import org.ec4j.core.model.PropertyType;
 
 public class EditorConfigHelper {
 
@@ -25,9 +29,11 @@ public class EditorConfigHelper {
   }
 
   public EditorConfigInfo getEditorConfigInfo(File file) throws IOException {
-    ResourceProperties props = propService.queryProperties(Resource.Resources.ofPath(file.toPath(), StandardCharsets.UTF_8));
+    ResourceProperties props = propService
+      .queryProperties(Resource.Resources.ofPath(file.toPath(), StandardCharsets.UTF_8));
 
-    PropertyType.IndentStyleValue indentStyleValue = props.getValue(PropertyType.indent_style, PropertyType.IndentStyleValue.space, true);
+    PropertyType.IndentStyleValue indentStyleValue = props.getValue(PropertyType.indent_style,
+      PropertyType.IndentStyleValue.space, true);
     boolean indentWithSpaces = indentStyleValue == PropertyType.IndentStyleValue.space;
 
     int indentSize = props.getValue(PropertyType.indent_size, 2, true);
@@ -46,8 +52,7 @@ public class EditorConfigHelper {
       endOfLine,
       trimTrailingWhitespace,
       charset,
-      insertFinalNewline
-    );
+      insertFinalNewline);
   }
 
   public EditorConfigInfo getEditorConfigInfo(String file) throws IOException {

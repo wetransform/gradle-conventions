@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import groovy.transform.CompileStatic
-import org.gradle.api.Action
 
 import javax.inject.Inject
+
+import org.gradle.api.Action
 
 @CompileStatic
 class PluginConfig {

@@ -1,12 +1,16 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
+
+import javax.inject.Inject
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.jvm.tasks.Jar
-
-import javax.inject.Inject
 
 class PublishPlugin implements Plugin<Project> {
 
@@ -102,7 +106,8 @@ class PublishPlugin implements Plugin<Project> {
             artifact(project.tasks.named('sourcesJar').get())
 
             pom {
-              scm { // add SCM info - required for changelogs in Renovate
+              scm {
+                // add SCM info - required for changelogs in Renovate
                 url = config.sourceUrl.get()
                 def scmUrl = "scm:git:git@github.com:${config.repoOwner.get()}/${config.repoName.get()}.git"
                 connection = scmUrl
@@ -118,8 +123,8 @@ class PublishPlugin implements Plugin<Project> {
           def prefix = config.privateRepo.get() ? 'private' : 'libs'
           url = project.uri(
             "https://artifactory.wetransform.to/artifactory/" +
-              (project.version.toString().endsWith('-SNAPSHOT') ? "${prefix}-snapshot-local" : "${prefix}-release-local")
-          )
+            (project.version.toString().endsWith('-SNAPSHOT') ? "${prefix}-snapshot-local" : "${prefix}-release-local")
+            )
           credentials {
             username = project.hasProperty('wetfArtifactoryUser') ? project.property('wetfArtifactoryUser') : ''
             password = project.hasProperty('wetfArtifactoryPassword') ? project.property('wetfArtifactoryPassword') : ''
@@ -168,7 +173,7 @@ class PublishPlugin implements Plugin<Project> {
           'org.opencontainers.image.created': buildTime,
           // custom
           'git.branch': grgit?.branch?.current?.name ?: 'unknown'
-        )
+          )
       }
     }
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import org.gradle.api.Project
@@ -26,7 +30,8 @@ class RepoConfig {
    */
   void wetfPrivate() {
     project.repositories {
-      maven { // wetransform internal release repository
+      maven {
+        // wetransform internal release repository
         url 'https://artifactory.wetransform.to/artifactory/private'
         credentials {
           username project.hasProperty('wetfArtifactoryUser') ? project.property('wetfArtifactoryUser') : ''
@@ -49,5 +54,4 @@ class RepoConfig {
       mavenLocal()
     }
   }
-
 }

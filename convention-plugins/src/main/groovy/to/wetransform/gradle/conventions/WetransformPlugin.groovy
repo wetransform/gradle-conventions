@@ -1,15 +1,20 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
+
+import javax.inject.Inject
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-
-import javax.inject.Inject
 
 @CompileStatic
 class WetransformPlugin implements Plugin<Project>, ConfigProvider {

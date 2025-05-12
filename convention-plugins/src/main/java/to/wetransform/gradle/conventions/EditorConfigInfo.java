@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions;
 
-import com.diffplug.spotless.LineEnding;
 import org.ec4j.core.model.PropertyType;
+
+import com.diffplug.spotless.LineEnding;
 
 public record EditorConfigInfo(
   boolean indentWithSpaces,
@@ -9,8 +14,7 @@ public record EditorConfigInfo(
   PropertyType.EndOfLineValue endOfLine,
   boolean trimTrailingWhitespace,
   String charset,
-  boolean insertFinalNewline
-) {
+  boolean insertFinalNewline) {
   // convert endOfLine to spotless LineEnding
   public LineEnding getLineEnding() {
     if (endOfLine == null) {

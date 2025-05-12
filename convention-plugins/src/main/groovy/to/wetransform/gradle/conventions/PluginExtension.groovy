@@ -1,11 +1,16 @@
+/*
+ * Copyright (c) 2025 wetransform GmbH
+ * All rights reserved.
+ */
 package to.wetransform.gradle.conventions
 
 import groovy.transform.CompileStatic
+
+import javax.inject.Inject
+
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
-
-import javax.inject.Inject
 
 @CompileStatic
 class PluginExtension {
