@@ -1,3 +1,15 @@
+## [1.1.0](https://github.com/wetransform/gradle-conventions/compare/v1.0.1...v1.1.0) (2025-05-12)
+
+### Features
+
+* add custom configuration for eclipse formatter ([c1cc8a9](https://github.com/wetransform/gradle-conventions/commit/c1cc8a9bf274a238d833560543c822e37651509c))
+* don't cache changing modules ([19a77a1](https://github.com/wetransform/gradle-conventions/commit/19a77a144d62e7848d7dae0e590ebfc9fba88616))
+* support skipping defining the MavenPublication ([9ca225b](https://github.com/wetransform/gradle-conventions/commit/9ca225b09a22d20ecbf9b0b0672559ac91ef6dfc))
+
+### Bug Fixes
+
+* correctly create SCM connection string ([8af5cbe](https://github.com/wetransform/gradle-conventions/commit/8af5cbea34b501c04ff796cf6a20d61ca593e210))
+
 ## [1.0.1](https://github.com/wetransform/gradle-conventions/compare/v1.0.0...v1.0.1) (2025-05-09)
 
 ### Bug Fixes
