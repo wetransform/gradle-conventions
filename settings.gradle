@@ -8,7 +8,7 @@ pluginManagement {
 }
 
 plugins {
-  id('to.wetransform.settings.default') version "1.1.0"
+  id('to.wetransform.settings.default') version "1.3.0"
 }
 
 rootProject.name = 'gradle-conventions'
