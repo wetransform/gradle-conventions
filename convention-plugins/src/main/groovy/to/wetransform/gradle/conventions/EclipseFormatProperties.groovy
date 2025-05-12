@@ -8,6 +8,8 @@ class EclipseFormatProperties {
   static Map <String, String> getProperties(EditorConfigInfo editorConfig, boolean groovy) {
     Map<String, String> properties = [:]
 
+    int maxLineLength = 120
+
     // Overview on options:
     // https://github.com/eclipse-jdt/eclipse.jdt.core/blob/master/org.eclipse.jdt.core/formatter/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.java
 
@@ -24,10 +26,10 @@ class EclipseFormatProperties {
     properties['org.eclipse.jdt.core.formatter.indentation.size'] = editorConfig.indentSize() as String
 
     // Option to specify the length of the page. Beyond this length, the formatter will try to split the code
-    properties['org.eclipse.jdt.core.formatter.lineSplit'] = '120'
+    properties['org.eclipse.jdt.core.formatter.lineSplit'] = maxLineLength as String
 
     // Option to specify the line length for comments.
-    properties['org.eclipse.jdt.core.formatter.comment.line_length'] = '120'
+    properties['org.eclipse.jdt.core.formatter.comment.line_length'] = maxLineLength as String
 
     // Option to specify whether the formatter can join wrapped lines or not
     properties['org.eclipse.jdt.core.formatter.join_wrapped_lines'] = 'false'
@@ -45,11 +47,26 @@ class EclipseFormatProperties {
     // Option to set the continuation indentation
     // The value (n) is interpreted a <n> times the indentation size (e.g. if the value is 2 and normal indentation is
     // 2 spaces, the indentation for the continuation is 4 spaces).
-    properties['org.eclipse.jdt.core.formatter.continuation_indentation'] = '2'
+    int continuationIndentationFactor = 1
+    properties['org.eclipse.jdt.core.formatter.continuation_indentation'] = continuationIndentationFactor as String
+
+    // Option to insert a new line at the end of the current file if missing
+    properties['org.eclipse.jdt.core.formatter.insert_new_line_at_end_of_file_if_missing'] = editorConfig.insertFinalNewline() ? 'insert' : 'do_not_insert'
+
+    // Option to position parentheses in method invocations
+    // properties['org.eclipse.jdt.core.formatter.parentheses_positions_in_method_invocation'] = 'separate_lines_if_wrapped'
+    // Note: Looks bad because the parentheses at the end are not aligned with the method call
 
     if (groovy) {
       // Groovy specific settings
+
+      // See https://github.com/groovy/groovy-eclipse/blob/master/ide/org.codehaus.groovy.eclipse.refactoring/src/org/codehaus/groovy/eclipse/refactoring/PreferenceConstants.java
+
       properties['groovy.formatter.remove.unnecessary.semicolons'] = 'true'
+
+      properties['groovy.formatter.line.maxlength'] = maxLineLength as String
+
+      properties['groovy.formatter.multiline.indentation'] = continuationIndentationFactor as String
     }
     return properties
   }
@@ -62,5 +79,4 @@ class EclipseFormatProperties {
     }
     return sb.toString()
   }
-
 }
