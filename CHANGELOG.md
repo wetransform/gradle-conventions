@@ -1,3 +1,15 @@
+## [1.2.0](https://github.com/wetransform/gradle-conventions/compare/v1.1.0...v1.2.0) (2025-05-12)
+
+### Features
+
+* better detection if a project uses Java, Groovy or Kotlin ([cb06836](https://github.com/wetransform/gradle-conventions/commit/cb06836c9c92fdc96e6f3953acf0822241543857))
+* improvements to Eclipse format settings ([e03e794](https://github.com/wetransform/gradle-conventions/commit/e03e794c056b5c1a6087333a85ffc7456b4a0b5a))
+
+### Bug Fixes
+
+* change setting name for private repo for better compatibility ([f5fe087](https://github.com/wetransform/gradle-conventions/commit/f5fe087896870bd422aab587b95fc8a6777a3d51))
+* override default group name ([2999ea7](https://github.com/wetransform/gradle-conventions/commit/2999ea7dc75a34cb77f5bdb23c669f1d136dc4cb))
+
 ## [1.1.0](https://github.com/wetransform/gradle-conventions/compare/v1.0.1...v1.1.0) (2025-05-12)
 
 ### Features
