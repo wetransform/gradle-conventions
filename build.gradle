@@ -1,37 +1,31 @@
 plugins {
-  id('to.wetransform.semantic-release-version') version '2.1.2' apply false
+  id('to.wetransform.conventions') version '1.1.0'
 }
 
 subprojects {
   apply plugin: 'java'
   apply plugin: 'maven-publish'
-  apply plugin: 'to.wetransform.semantic-release-version'
+  apply plugin: 'to.wetransform.conventions'
 
   group = 'to.wetransform.gradle'
+
+  wetransform {
+    setup {
+      javaVersion(17)
+
+      spotless {
+        disable = true
+      }
+
+      publish {
+        // MavenPublication seems to be defined by gradle-plugin plugins already
+        skipDefineMavenPublication = true
+      }
+    }
+  }
 
   repositories {
     gradlePluginPortal()
     mavenCentral()
-  }
-
-  publishing {
-    // not needed - configured by gradle-plugin plugin
-//    publications {
-//      mavenJava(MavenPublication) {
-//        from components.java
-//      }
-//    }
-
-    repositories {
-      maven {
-        url = project.version.endsWith('-SNAPSHOT') ?
-          'https://artifactory.wetransform.to/artifactory/libs-snapshot-local' :
-          'https://artifactory.wetransform.to/artifactory/libs-release-local'
-        credentials {
-          username project.hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : ''
-          password project.hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
-        }
-      }
-    }
   }
 }
