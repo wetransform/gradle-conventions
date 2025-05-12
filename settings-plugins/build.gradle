@@ -12,9 +12,9 @@ gradlePlugin {
 }
 
 dependencies {
-  testImplementation platform("org.spockframework:spock-bom:2.2-groovy-3.0")
-  testImplementation 'org.spockframework:spock-core'
-  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  testImplementation platform(testLibs.spock.bom)
+  testImplementation testLibs.spock.core
+  testRuntimeOnly testLibs.junit.platform.launcher
 }
 
 test {
