@@ -54,8 +54,8 @@ class SpotlessPlugin implements Plugin<Project> {
         applyGenericSettings(it, genericConfig)
       }
 
-      def hasGroovy = project.plugins.hasPlugin('groovy')
-      def hasJava = project.plugins.hasPlugin('java')
+      def hasGroovy = ProjectHelper.hasGroovy(project)
+      def hasJava = ProjectHelper.hasJava(project)
 
       // check if the groovy plugin is applied
       if (hasGroovy) {
@@ -99,7 +99,7 @@ class SpotlessPlugin implements Plugin<Project> {
         }
       }
 
-      def hasKotlin = project.plugins.hasPlugin('org.jetbrains.kotlin.jvm')
+      def hasKotlin = ProjectHelper.hasKotlin(project)
       if (hasKotlin) {
         def kotlinConfig = ech.getEditorConfigInfo(new File(project.projectDir, 'src/main/kotlin/test.kt'))
 

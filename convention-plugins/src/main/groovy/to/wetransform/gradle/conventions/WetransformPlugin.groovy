@@ -54,17 +54,14 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
   @CompileStatic(TypeCheckingMode.SKIP) // skip because Kotlin extension type is not available at compile time
   def void setup(Project project) {
-    def hasJava = project.plugins.hasPlugin('java')
-    def hasKotlin = project.plugins.hasPlugin('org.jetbrains.kotlin.jvm')
-
     if (javaVersion.isPresent()) {
-      if (hasJava) {
+      if (ProjectHelper.hasJava(project)) {
         project.extensions.configure(JavaPluginExtension) { java ->
           java.toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.get()))
         }
       }
 
-      if (hasKotlin) {
+      if (ProjectHelper.hasKotlin(project)) {
         // org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
         project.extensions.configure('kotlin') { kotlin ->
           kotlin.jvmToolChain.languageVersion.set(JavaLanguageVersion.of(javaVersion.get()))
