@@ -143,7 +143,7 @@ class PublishPlugin implements Plugin<Project> {
         if (config.mainClass.isPresent()) {
           mainClassName = config.mainClass
         }
-        // ports = [1234]
+        ports = config.ports.convention([])
         images = [
           "${config.imageName.get()}:${project.version}",
           "${config.imageName.get()}:latest"
