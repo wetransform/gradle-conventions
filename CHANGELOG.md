@@ -1,3 +1,16 @@
+## [1.5.0](https://github.com/wetransform/gradle-conventions/compare/v1.4.0...v1.5.0) (2025-05-13)
+
+### Features
+
+* allow configuring Docker exposed ports ([5d2ea4d](https://github.com/wetransform/gradle-conventions/commit/5d2ea4d8856e4bf741bcc31c9128953a66fbf978))
+* support splitting configuration of conventions ([42d0fd5](https://github.com/wetransform/gradle-conventions/commit/42d0fd54694761cfea452b71e1b6d83f6f0e9243))
+
+### Bug Fixes
+
+* fix source Jar creation ([6b16ac8](https://github.com/wetransform/gradle-conventions/commit/6b16ac8cd99d5d75202a3de04a1422964485474e))
+* fix wrong spelling when setting Kotlin toolchain ([3bbf461](https://github.com/wetransform/gradle-conventions/commit/3bbf46124e13cc31eab0fc25d448b5cf3f631dd3))
+* ktlint not loading editorconfig file ([f9def06](https://github.com/wetransform/gradle-conventions/commit/f9def061b9cb3639a0f7d5671e682aead24dca93))
+
 ## [1.4.0](https://github.com/wetransform/gradle-conventions/compare/v1.3.0...v1.4.0) (2025-05-13)
 
 ### Features
