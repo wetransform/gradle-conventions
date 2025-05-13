@@ -56,7 +56,7 @@ class PluginExtension {
   }
 
   void setup(Action<PluginConfig> action) {
-    action.execute(setup)
+    config(action)
 
     setup()
   }
@@ -69,5 +69,9 @@ class PluginExtension {
 
     def publish = new PublishPlugin(plugin.publishConfig)
     publish.apply(project)
+  }
+
+  void config(Action<PluginConfig> action) {
+    action.execute(setup)
   }
 }
