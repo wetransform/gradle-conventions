@@ -17,6 +17,9 @@ class EclipseFormatProperties {
     // Overview on options:
     // https://github.com/eclipse-jdt/eclipse.jdt.core/blob/master/org.eclipse.jdt.core/formatter/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.java
 
+    // Example from spring-javaformat (option names are truncated):
+    // https://github.com/philwebb/spring-javaformat/blob/main/spring-javaformat/spring-javaformat-formatter/src/main/resources/io/spring/javaformat/formatter/eclipse/formatter.prefs
+
     // Whether to use 'space', 'tab' or 'mixed' (both) characters for indentation.
     // The default value is 'tab'.
     properties['org.eclipse.jdt.core.formatter.tabulation.char'] = editorConfig.indentWithSpaces() ? 'space' : 'tab'
@@ -36,10 +39,10 @@ class EclipseFormatProperties {
     properties['org.eclipse.jdt.core.formatter.comment.line_length'] = maxLineLength as String
 
     // Option to specify whether the formatter can join wrapped lines or not
-    properties['org.eclipse.jdt.core.formatter.join_wrapped_lines'] = 'false'
+    properties['org.eclipse.jdt.core.formatter.join_wrapped_lines'] = 'false' // TODO make configurable?
 
     // Option to specify whether the formatter can join text lines in comments or not
-    properties['org.eclipse.jdt.core.formatter.join_lines_in_comments'] = 'false'
+    properties['org.eclipse.jdt.core.formatter.join_lines_in_comments'] = 'false' // TODO make configurable?
 
     // Whether or not indentation characters are inserted into empty lines.
     // The default value is 'true'.
@@ -56,6 +59,16 @@ class EclipseFormatProperties {
 
     // Option to insert a new line at the end of the current file if missing
     properties['org.eclipse.jdt.core.formatter.insert_new_line_at_end_of_file_if_missing'] = editorConfig.insertFinalNewline() ? 'insert' : 'do_not_insert'
+
+    // Note: The effect of the following two options with the current settings are that method invocation chains are wrapped into new lines
+
+    // Option to indent method invocation chains based on the first line of the base expression rather than the last line.
+    properties['org.eclipse.jdt.core.formatter.align_selector_in_method_invocation_on_expression_first_line'] = 'true'
+
+    // Option for alignment of selector in method invocation
+    // Note: This is an alignment value computed in a special way
+    // See https://github.com/eclipse-jdt/eclipse.jdt.core/blob/85f1797ab9f379eeffd203d94522fbf3c6a4e7ce/org.eclipse.jdt.core/formatter/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.java#L5915
+    properties['org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation'] = '84'
 
     // Option to position parentheses in method invocations
     // properties['org.eclipse.jdt.core.formatter.parentheses_positions_in_method_invocation'] = 'separate_lines_if_wrapped'
