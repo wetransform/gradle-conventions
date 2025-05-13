@@ -3,4 +3,11 @@
   extends: [
     "github>wetransform/renovate-config:self-hosted.json5"
   ],
+  packageRules: [
+    {
+      "matchDatasources": ["maven"],
+      "matchPackageNames": ["org.spockframework:spock-bom"],
+      "versionCompatibility": "^(?<version>[^-]+(?<compatibility>-.*))$"
+    }
+  ]
 }
