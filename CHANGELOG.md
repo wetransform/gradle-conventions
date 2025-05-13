@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/wetransform/gradle-conventions/compare/v1.3.0...v1.4.0) (2025-05-13)
+
+### Features
+
+* better format chained method calls in Java ([9973518](https://github.com/wetransform/gradle-conventions/commit/9973518525112c9c2a3f81077044ce33b0ad3d9b))
+
 ## [1.3.0](https://github.com/wetransform/gradle-conventions/compare/v1.2.0...v1.3.0) (2025-05-12)
 
 ### Features
