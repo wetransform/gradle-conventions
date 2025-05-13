@@ -4,6 +4,7 @@
  */
 package to.wetransform.gradle.conventions;
 
+import org.ec4j.core.ResourceProperties;
 import org.ec4j.core.model.PropertyType;
 
 import com.diffplug.spotless.LineEnding;
@@ -14,7 +15,8 @@ public record EditorConfigInfo(
   PropertyType.EndOfLineValue endOfLine,
   boolean trimTrailingWhitespace,
   String charset,
-  boolean insertFinalNewline) {
+  boolean insertFinalNewline,
+  ResourceProperties props) {
   // convert endOfLine to spotless LineEnding
   public LineEnding getLineEnding() {
     if (endOfLine == null) {
@@ -26,5 +28,9 @@ public record EditorConfigInfo(
       case lf -> LineEnding.UNIX;
       case cr -> LineEnding.MAC_CLASSIC;
     };
+  }
+
+  public boolean hasProperty(String property) {
+    return props.getProperties().containsKey(property);
   }
 }
