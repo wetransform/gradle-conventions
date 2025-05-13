@@ -50,6 +50,36 @@ wetransform {
 }
 ```
 
+Please note that the call to `setup` is required to apply the conventions, except for the configuration of repositories.
+If you need to split the configuration of the plugin into multiple blocks you should make sure to call `setup` only once.
+For previous cases you can use the `config` method to configure the plugin in multiple blocks.
+
+Here two examples that are equivalent related to the result, each of them sets the Java version to 17 and applies the conventions.
+
+Configuration in setup call:
+
+```groovy
+wetransform {
+    setup {
+        javaVersion(17)
+    }
+}
+```
+
+Do configuration and later call setup:
+
+```groovy
+wetransform {
+    config {
+        javaVersion(17)
+    }
+}
+
+wetransform {
+    setup()
+}
+```
+
 ### Configure wetransform repositories
 
 ```groovy
