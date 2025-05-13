@@ -19,7 +19,6 @@ indent_size = 2
 [*.{kt,kts}]
 indent_style = space
 indent_size = 2
-ktlint_standard_no-wildcard-imports = disabled
 
 [{*.groovy,*.java}]
 indent_style = space

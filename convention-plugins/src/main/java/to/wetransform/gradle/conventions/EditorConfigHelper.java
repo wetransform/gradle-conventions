@@ -52,7 +52,8 @@ public class EditorConfigHelper {
       endOfLine,
       trimTrailingWhitespace,
       charset,
-      insertFinalNewline);
+      insertFinalNewline,
+      props);
   }
 
   public EditorConfigInfo getEditorConfigInfo(String file) throws IOException {

@@ -10,6 +10,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 
+import com.diffplug.gradle.spotless.BaseKotlinExtension
 import com.diffplug.gradle.spotless.FormatExtension
 import com.diffplug.gradle.spotless.SpotlessExtension
 
@@ -112,13 +113,29 @@ class SpotlessPlugin implements Plugin<Project> {
           // target '**/*.kt'
 
           def ecFile = project.rootProject.file('.editorconfig')
+          def BaseKotlinExtension.KtlintConfig ktConfig
           if (ecFile.exists()) {
-            it.ktlint().setEditorConfigPath(ecFile)
+            ktConfig = it.ktlint()
+            // Note: Setting the path like this did not work correctly (e.g. instructions to disable ktlint rules did not work)
+            // For spotless the default location is the root project anyway, so we do not need to set it
+            //.setEditorConfigPath(ecFile)
           } else {
-            it.ktlint()
+            ktConfig = it.ktlint()
 
             applyGenericSettings(it, kotlinConfig)
           }
+
+          def defaultOverrides = [
+            // by default allow wildcard imports because IntelliJ adds them
+            'ktlint_standard_no-wildcard-imports': 'disabled',
+          ]
+
+          // filter overrides - don't override if a custom config is present
+          def overrides = defaultOverrides.findAll { key, value ->
+            !kotlinConfig.hasProperty(key)
+          }
+
+          ktConfig.editorConfigOverride(overrides)
 
           applyLicenseHeader(it, project)
         }
