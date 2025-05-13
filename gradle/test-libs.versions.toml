@@ -1,4 +1,4 @@
 [libraries]
-spock-bom = { module = "org.spockframework:spock-bom", version = "2.2-groovy-3.0" }
+spock-bom = { module = "org.spockframework:spock-bom", version = "2.3-groovy-3.0" }
 spock-core = { module = "org.spockframework:spock-core" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
