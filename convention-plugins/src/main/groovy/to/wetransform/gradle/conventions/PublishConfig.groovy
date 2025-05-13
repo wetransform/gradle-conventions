@@ -5,6 +5,7 @@
 package to.wetransform.gradle.conventions
 
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 
 interface PublishConfig {
   /**
@@ -62,4 +63,9 @@ interface PublishConfig {
    * The main Java class to run in the Docker image.
    */
   Property<String> getMainClass()
+
+  /**
+   * The ports to expose in the Docker image.
+   */
+  SetProperty<Integer> getPorts()
 }
