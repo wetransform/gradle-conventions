@@ -93,7 +93,7 @@ class PublishPlugin implements Plugin<Project> {
   def void configureMavenPublish(Project project) {
     // Create sourcesJar task
     project.tasks.register('sourcesJar', Jar) { task ->
-      task.from(project.sourceSets.main.allJava)
+      task.from(project.sourceSets.main.allSource)
       task.archiveClassifier.set('sources')
     }
 
