@@ -69,7 +69,7 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
       if (ProjectHelper.hasKotlin(project)) {
         // org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
         project.extensions.configure('kotlin') { kotlin ->
-          kotlin.jvmToolChain.languageVersion.set(JavaLanguageVersion.of(javaVersion.get()))
+          kotlin.jvmToolchain(JavaLanguageVersion.of(javaVersion.get()).asInt())
         }
       }
     }
