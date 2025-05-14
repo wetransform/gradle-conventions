@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/wetransform/gradle-conventions/compare/v1.5.1...v1.6.0) (2025-05-14)
+
+### Features
+
+* support dependency locking for use with trivy ([dc556a3](https://github.com/wetransform/gradle-conventions/commit/dc556a327603a687e65f598354cf14ee414377e6))
+* support Scala publishing and formatting ([6127610](https://github.com/wetransform/gradle-conventions/commit/61276105a21bb31d09336db1542c7d58637c41ed))
+
 ## [1.5.1](https://github.com/wetransform/gradle-conventions/compare/v1.5.0...v1.5.1) (2025-05-14)
 
 ### Bug Fixes
