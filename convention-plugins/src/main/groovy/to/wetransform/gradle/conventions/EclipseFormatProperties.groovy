@@ -49,7 +49,7 @@ class EclipseFormatProperties {
     properties['org.eclipse.jdt.core.formatter.indent_empty_lines'] = !editorConfig.trimTrailingWhitespace() as String
 
     // Option to insert a new line before the else keyword in if statement
-    properties['org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement'] = 'insert'
+    properties['org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement'] = 'do_not_insert'
 
     // Option to set the continuation indentation
     // The value (n) is interpreted a <n> times the indentation size (e.g. if the value is 2 and normal indentation is
