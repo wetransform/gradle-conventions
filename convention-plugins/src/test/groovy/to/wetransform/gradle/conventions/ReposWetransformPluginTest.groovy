@@ -40,6 +40,60 @@ class ReposWetransformPluginTest extends PluginTest {
     result.task(":test").outcome == TaskOutcome.SUCCESS
   }
 
+  def "creates a version lockfile if prompted to write locks"() {
+    setup:
+    buildFile << """
+    wetransform {
+      setup()
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('dependencies', '--write-locks')
+
+    then:
+    result.task(":dependencies").outcome == TaskOutcome.SUCCESS
+    def lockFile = new File(testProjectDir, "gradle.lockfile")
+    assert lockFile.exists()
+    assert lockFile.text.contains("eu.esdihumboldt.hale:eu.esdihumboldt.util.config:6.2.2=")
+  }
+
+  def "creates no version lockfile if disabled"() {
+    setup:
+    buildFile << """
+    wetransform {
+      setup {
+        deactivateDependencyLocking()
+      }
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('dependencies', '--write-locks')
+
+    then:
+    result.task(":dependencies").outcome == TaskOutcome.SUCCESS
+    def lockFile = new File(testProjectDir, "gradle.lockfile")
+    assert !lockFile.exists()
+  }
+
+  def "creates no version lockfile if not prompted to write locks"() {
+    setup:
+    buildFile << """
+    wetransform {
+      setup()
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('dependencies')
+
+    then:
+    result.task(":dependencies").outcome == TaskOutcome.SUCCESS
+    def lockFile = new File(testProjectDir, "gradle.lockfile")
+    assert !lockFile.exists()
+  }
+
   private void createTestClass() {
     def testFile = new File(testProjectDir, "src/test/java/com/myorg/MyTest.java")
     testFile.parentFile.mkdirs()
