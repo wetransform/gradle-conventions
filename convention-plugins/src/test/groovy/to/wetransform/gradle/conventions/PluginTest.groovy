@@ -20,10 +20,12 @@ abstract class PluginTest extends Specification {
     buildFile = new File(testProjectDir, 'build.gradle')
   }
 
-  def runTask(String task) {
+  def runTask(String task, String... args) {
+    def arguments = [task, '--stacktrace'] + args.toList()
+
     return GradleRunner.create()
       .withProjectDir(testProjectDir)
-      .withArguments(task, '--stacktrace')
+      .withArguments(arguments)
       .withPluginClasspath()
       .build()
   }

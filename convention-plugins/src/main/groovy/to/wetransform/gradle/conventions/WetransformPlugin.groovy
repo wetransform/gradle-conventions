@@ -25,6 +25,8 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
   private final Property<String> javaVersion
 
+  private final Property<Boolean> activateDependencyLocking
+
   private final ObjectFactory objectFactory
 
   @Inject
@@ -34,6 +36,7 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
     this.spotlessConfig = objectFactory.newInstance(SpotlessConfig)
     this.publishConfig = objectFactory.newInstance(PublishConfig)
     this.javaVersion = objectFactory.property(String)
+    this.activateDependencyLocking = objectFactory.property(Boolean)
   }
 
   @Override
@@ -57,6 +60,11 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
     return javaVersion
   }
 
+  @Override
+  Property<Boolean> getActivateDependencyLocking() {
+    return activateDependencyLocking
+  }
+
   @CompileStatic(TypeCheckingMode.SKIP) // skip because Kotlin extension type is not available at compile time
   def void setup(Project project) {
     if (javaVersion.isPresent()) {
@@ -77,6 +85,26 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
     project.configurations.configureEach {
       // ensure SNAPSHOTs are updated every time if needed
       it.resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+
+    // dependency locking for lockfile generation (used for trivy security scan)
+    boolean hasConfigs = project.configurations.findByName('compileClasspath') != null &&
+      project.configurations.findByName('runtimeClasspath') != null
+
+    if (hasConfigs) {
+      // by default only apply if 3 or less total projects, because of the overhead of generating the lockfile
+      activateDependencyLocking.convention(project.rootProject.subprojects.size() <= 2)
+
+      if (activateDependencyLocking.get()) {
+        project.configurations {
+          compileClasspath {
+            resolutionStrategy.activateDependencyLocking()
+          }
+          runtimeClasspath {
+            resolutionStrategy.activateDependencyLocking()
+          }
+        }
+      }
     }
   }
 }
