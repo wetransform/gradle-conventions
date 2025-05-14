@@ -9,6 +9,7 @@ import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.jvm.tasks.Jar
 
@@ -16,13 +17,16 @@ class PublishPlugin implements Plugin<Project> {
 
   private final PublishConfig config
 
+  private final Property<String> scalaVersion
+
   @Inject
   PublishPlugin(ObjectFactory objectFactory) {
-    this(objectFactory.newInstance(PublishConfig))
+    this(objectFactory, objectFactory.newInstance(PublishConfig), null)
   }
 
-  PublishPlugin(PublishConfig config) {
+  PublishPlugin(ObjectFactory objectFactory, PublishConfig config, ConfigProvider configProvider) {
     this.config = config
+    this.scalaVersion = configProvider?.scalaVersion ?: objectFactory.property(String)
   }
 
   @Override
@@ -101,9 +105,13 @@ class PublishPlugin implements Plugin<Project> {
     project.publishing {
       publications {
         if (!config.skipDefineMavenPublication.get()) {
-          library(MavenPublication) {
+          maven(MavenPublication) {
             from(project.components.java)
             artifact(project.tasks.named('sourcesJar').get())
+
+            if (scalaVersion.isPresent()) {
+              artifactId = "${artifactId}_${scalaVersion.get()}"
+            }
 
             pom {
               scm {

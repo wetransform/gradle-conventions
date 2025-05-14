@@ -25,6 +25,8 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
   private final Property<String> javaVersion
 
+  private final Property<String> scalaVersion
+
   private final Property<Boolean> activateDependencyLocking
 
   private final ObjectFactory objectFactory
@@ -36,6 +38,7 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
     this.spotlessConfig = objectFactory.newInstance(SpotlessConfig)
     this.publishConfig = objectFactory.newInstance(PublishConfig)
     this.javaVersion = objectFactory.property(String)
+    this.scalaVersion = objectFactory.property(String)
     this.activateDependencyLocking = objectFactory.property(Boolean)
   }
 
@@ -58,6 +61,11 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
   @Override
   Property<String> getJavaVersion() {
     return javaVersion
+  }
+
+  @Override
+  Property<String> getScalaVersion() {
+    return scalaVersion
   }
 
   @Override
@@ -85,6 +93,14 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
     project.configurations.configureEach {
       // ensure SNAPSHOTs are updated every time if needed
       it.resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+
+    // scala version
+    if (scalaVersion.isPresent()) {
+      def ext = project.extensions.findByName('ext')
+      if (ext != null) {
+        ext.scalaVersion = scalaVersion.get()
+      }
     }
 
     // dependency locking for lockfile generation (used for trivy security scan)

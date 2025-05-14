@@ -9,6 +9,7 @@ import javax.inject.Inject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 
 import com.diffplug.gradle.spotless.BaseKotlinExtension
 import com.diffplug.gradle.spotless.FormatExtension
@@ -18,13 +19,16 @@ class SpotlessPlugin implements Plugin<Project> {
 
   private final SpotlessConfig config
 
+  private final Property<String> scalaVersion
+
   @Inject
   SpotlessPlugin(ObjectFactory objectFactory) {
-    this(objectFactory.newInstance(SpotlessConfig))
+    this(objectFactory, objectFactory.newInstance(SpotlessConfig), null)
   }
 
-  SpotlessPlugin(SpotlessConfig config) {
+  SpotlessPlugin(ObjectFactory objectFactory, SpotlessConfig config, ConfigProvider configProvider) {
     this.config = config
+    this.scalaVersion = configProvider?.scalaVersion ?: objectFactory.property(String)
   }
 
   @Override
@@ -138,6 +142,27 @@ class SpotlessPlugin implements Plugin<Project> {
           ktConfig.editorConfigOverride(overrides)
 
           applyLicenseHeader(it, project)
+        }
+      }
+
+      if (ProjectHelper.hasScala(project)) {
+        def scalaConfig = ech.getEditorConfigInfo(new File(project.projectDir, 'src/main/scala/test.scala'))
+
+        spotless.scala {
+          it.target '**/*.scala'
+
+          def scf = it.scalafmt()
+
+          if (scalaVersion.isPresent()) {
+            scf.scalaMajorVersion(scalaVersion.get())
+          }
+
+          def header = config.licenseHeader.get()
+          if (header) {
+            it.licenseHeader(header, 'package ')
+          }
+
+          applyGenericSettings(it, scalaConfig)
         }
       }
     }

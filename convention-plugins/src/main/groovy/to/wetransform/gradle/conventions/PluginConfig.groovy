@@ -32,6 +32,10 @@ class PluginConfig {
     configProvider.javaVersion.set(version as String)
   }
 
+  void scalaVersion(def version) {
+    configProvider.scalaVersion.set(version as String)
+  }
+
   void activateDependencyLocking() {
     configProvider.activateDependencyLocking.set(true)
   }
