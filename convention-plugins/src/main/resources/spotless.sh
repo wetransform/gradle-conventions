@@ -30,7 +30,7 @@
 set -e
 
 # Define the list of allowed file extensions
-allowed_extensions=("java" "md" "groovy" "gradle" "kt")
+allowed_extensions=("java" "md" "groovy" "gradle" "kt" "scala" "sc")
 
 # Check if a file path is provided
 if [ -z "$1" ]; then

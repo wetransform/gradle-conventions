@@ -19,12 +19,15 @@ class PluginExtension {
 
   private final WetransformPlugin plugin
 
+  private final ObjectFactory objectFactory
+
   final PluginConfig setup
 
   @Inject
   PluginExtension(Project project, WetransformPlugin plugin, ObjectFactory objectFactory) {
     this.project = project
     this.plugin = plugin
+    this.objectFactory = objectFactory
 
     // use object factory so DSL augmentation is done (e.g. create methods taking closure instead of Action as argument)
     setup = objectFactory.newInstance(PluginConfig, plugin)
@@ -64,10 +67,10 @@ class PluginExtension {
   void setup() {
     plugin.setup(project)
 
-    def spotless = new SpotlessPlugin(plugin.spotlessConfig)
+    def spotless = new SpotlessPlugin(objectFactory, plugin.spotlessConfig, plugin)
     spotless.apply(project)
 
-    def publish = new PublishPlugin(plugin.publishConfig)
+    def publish = new PublishPlugin(objectFactory, plugin.publishConfig, plugin)
     publish.apply(project)
   }
 

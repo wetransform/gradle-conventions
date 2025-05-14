@@ -110,6 +110,7 @@ Formatting with spotless is by default enabled for:
 - Java using Eclipse formatter
 - Groovy and Groovy Gradle files using Groovy-Eclipse formatter
 - Kotlin using ktlint
+- Scala using scalafmt (only 2 space indentation supported)
 
 Basic settings can be adapted by providing an `.editorconfig` file in the root of a project.
 This can be used to influence the indentation, line endings, and other formatting options.

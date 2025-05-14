@@ -23,6 +23,10 @@ class ProjectHelper {
     return project.plugins.hasPlugin('groovy') || hasFolder(project, 'src/main/groovy') || hasFolder(project, 'src/test/groovy')
   }
 
+  static boolean hasScala(Project project) {
+    return project.plugins.hasPlugin('scala') || hasFolder(project, 'src/main/scala') || hasFolder(project, 'src/test/scala')
+  }
+
   static boolean hasFolder(Project project, String folder) {
     return project.file(folder).exists()
   }

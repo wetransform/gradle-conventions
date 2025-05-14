@@ -14,6 +14,7 @@ interface ConfigProvider {
   PublishConfig getPublishConfig()
 
   Property<String> getJavaVersion()
+  Property<String> getScalaVersion()
 
   Property<Boolean> getActivateDependencyLocking()
 }
