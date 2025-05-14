@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/wetransform/gradle-conventions/compare/v1.5.0...v1.5.1) (2025-05-14)
+
+### Bug Fixes
+
+* **spotless:** do not force newline before else in Java ([8d8b56e](https://github.com/wetransform/gradle-conventions/commit/8d8b56e8bb09b9f052b42407cb2fd95760d91ce9))
+
 ## [1.5.0](https://github.com/wetransform/gradle-conventions/compare/v1.4.0...v1.5.0) (2025-05-13)
 
 ### Features
