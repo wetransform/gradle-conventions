@@ -1,5 +1,5 @@
 plugins {
-  id('to.wetransform.conventions') version '1.5.1'
+  id('to.wetransform.conventions') version '1.7.0'
 }
 
 subprojects {
@@ -12,6 +12,10 @@ subprojects {
   wetransform {
     setup {
       javaVersion(17)
+
+      spotless {
+        licenseHeader = APACHE
+      }
 
       publish {
         // publish to public repo
