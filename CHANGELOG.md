@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/wetransform/gradle-conventions/compare/v1.6.0...v1.7.0) (2025-05-15)
+
+### Features
+
+* add Apache pre-defined license header ([968d2a1](https://github.com/wetransform/gradle-conventions/commit/968d2a14d71542bdf729da55189ac08640944aad))
+
 ## [1.6.0](https://github.com/wetransform/gradle-conventions/compare/v1.5.1...v1.6.0) (2025-05-14)
 
 ### Features
