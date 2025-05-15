@@ -1,3 +1,13 @@
+## [2.0.0](https://github.com/wetransform/gradle-conventions/compare/v1.7.0...v2.0.0) (2025-05-15)
+
+### ⚠ BREAKING CHANGES
+
+* released under Apache license
+
+### Miscellaneous Chores
+
+* released under Apache license ([7906802](https://github.com/wetransform/gradle-conventions/commit/79068025d5def7d31fac7eba2a852abb2eeab4c9))
+
 ## [1.7.0](https://github.com/wetransform/gradle-conventions/compare/v1.6.0...v1.7.0) (2025-05-15)
 
 ### Features
