@@ -106,10 +106,14 @@ class PublishPlugin implements Plugin<Project> {
   }
 
   def void configureMavenPublish(Project project) {
-    // Create sourcesJar task
-    project.tasks.register('sourcesJar', Jar) { task ->
-      task.from(project.sourceSets.main.allSource)
-      task.archiveClassifier.set('sources')
+    def hasJavaPlatformPlugin = project.plugins.hasPlugin('java-platform')
+
+    if (!hasJavaPlatformPlugin) {
+      // Create sourcesJar task
+      project.tasks.register('sourcesJar', Jar) { task ->
+        task.from(project.sourceSets.main.allSource)
+        task.archiveClassifier.set('sources')
+      }
     }
 
     // Configure publishing
@@ -117,8 +121,12 @@ class PublishPlugin implements Plugin<Project> {
       publications {
         if (!config.skipDefineMavenPublication.get()) {
           maven(MavenPublication) {
-            from(project.components.java)
-            artifact(project.tasks.named('sourcesJar').get())
+            if (hasJavaPlatformPlugin) {
+              from(project.components.javaPlatform)
+            } else {
+              from(project.components.java)
+              artifact(project.tasks.named('sourcesJar').get())
+            }
 
             if (scalaVersion.isPresent()) {
               artifactId = "${artifactId}_${scalaVersion.get()}"

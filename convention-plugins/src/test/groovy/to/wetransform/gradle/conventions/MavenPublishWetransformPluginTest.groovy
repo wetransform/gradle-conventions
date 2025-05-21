@@ -59,6 +59,7 @@ class MavenPublishWetransformPluginTest extends PluginTest {
 
   def "Scala artifacts are published to local Maven repo"() {
     setup:
+    settingsFile.text = "rootProject.name = 'test-scala'"
     buildFile.text = """
     plugins {
       id 'scala'
@@ -87,15 +88,54 @@ class MavenPublishWetransformPluginTest extends PluginTest {
     result.task(':publishToMavenLocal').outcome == TaskOutcome.SUCCESS
 
     and:
-    new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test_2.13/1.0.0-SNAPSHOT/test_2.13-1.0.0-SNAPSHOT.jar").exists()
-    new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test_2.13/1.0.0-SNAPSHOT/test_2.13-1.0.0-SNAPSHOT-sources.jar").exists()
-    def pomFile = new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test_2.13/1.0.0-SNAPSHOT/test_2.13-1.0.0-SNAPSHOT.pom")
+    new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test-scala_2.13/1.0.0-SNAPSHOT/test-scala_2.13-1.0.0-SNAPSHOT.jar").exists()
+    new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test-scala_2.13/1.0.0-SNAPSHOT/test-scala_2.13-1.0.0-SNAPSHOT-sources.jar").exists()
+    def pomFile = new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test-scala_2.13/1.0.0-SNAPSHOT/test-scala_2.13-1.0.0-SNAPSHOT.pom")
     pomFile.exists()
-    validatePom(pomFile)
+    validatePom(pomFile, 'test-scala')
   }
 
-  void validatePom(File pomFile) {
+  def "BOM artifacts are published to local Maven repo"() {
+    setup:
+    settingsFile.text = "rootProject.name = 'test-bom'"
+    buildFile.text = """
+    plugins {
+      id 'java-platform'
+      id 'maven-publish'
+      id 'to.wetransform.conventions'
+    }
+    wetransform {
+      setup()
+    }
+    repositories {
+      mavenCentral()
+    }
+    javaPlatform {
+      allowDependencies() // for including other BOMs
+    }
+    dependencies {
+      api(platform("org.slf4j:slf4j-bom:2.0.17"))
+
+      api "ch.qos.logback:logback-classic:1.5.18"
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('publishToMavenLocal')
+
+    then:
+    result.task(':publishToMavenLocal').outcome == TaskOutcome.SUCCESS
+
+    and:
+    !new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test-bom/1.0.0-SNAPSHOT/test-bom-1.0.0-SNAPSHOT.jar").exists()
+    !new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test-bom/1.0.0-SNAPSHOT/test-bom-1.0.0-SNAPSHOT-sources.jar").exists()
+    def pomFile = new File("${System.getProperty('user.home')}/.m2/repository/to/wetransform/test-bom/1.0.0-SNAPSHOT/test-bom-1.0.0-SNAPSHOT.pom")
+    pomFile.exists()
+    validatePom(pomFile, 'test-bom')
+  }
+
+  void validatePom(File pomFile, String projectName = "test") {
     def pom = new XmlSlurper().parse(pomFile)
-    assert pom.scm.url.text() == "https://github.com/wetransform/test", "SCM URL in POM is incorrect"
+    assert pom.scm.url.text() == "https://github.com/wetransform/${projectName}", "SCM URL in POM is incorrect"
   }
 }
