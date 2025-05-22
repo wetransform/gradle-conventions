@@ -1,3 +1,13 @@
+## [2.1.0](https://github.com/wetransform/gradle-conventions/compare/v2.0.0...v2.1.0) (2025-05-22)
+
+### Features
+
+* support publishing java-platform projects ([29d49a8](https://github.com/wetransform/gradle-conventions/commit/29d49a8afafa63cef9ef03cbd3e655b23923419a))
+
+### Bug Fixes
+
+* **deps:** update dependency org.ec4j.core:ec4j-core to v1.1.1 ([cc0e10f](https://github.com/wetransform/gradle-conventions/commit/cc0e10f3b7cec73c0175a80dcba454bca063143a))
+
 ## [2.0.0](https://github.com/wetransform/gradle-conventions/compare/v1.7.0...v2.0.0) (2025-05-15)
 
 ### ⚠ BREAKING CHANGES
