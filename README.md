@@ -255,6 +255,24 @@ wetransform {
 }
 ```
 
+#### Local Docker settings
+
+To configure your local environment for accessing Docker and Docker Hub you can set the following Gradle properties:
+
+- **dockerHost** - Address for connecting to Docker, defaults to <http://localhost:2375>, on Linux usually should be set to the Docker socket (`unix:///var/run/docker.sock`) to which the user needs access to
+- **dockerHubUsername** - User name for Docker Hub
+- **dockerHubPassword** - Password or access token for Docker Hub, highly recommend to use an access token
+
+For these cases it is recommended to place a `gradle.properties` file in the `.gradle/` folder in your home directory (`~/.gradle/gradle.properties`).
+
+For example:
+
+```
+dockerHost=unix:///var/run/docker.sock
+dockerHubUsername=<username>
+dockerHubPassword=<access-token>
+```
+
 ## wetransform project settings conventions
 
 The plugin `to.wetransform.settings.default` can be used to apply a number of conventions to a project:
