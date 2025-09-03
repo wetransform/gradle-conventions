@@ -3,5 +3,5 @@ gradle-semantic-release-version = { module = "to.wetransform:gradle-semantic-rel
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "7.2.1" }
 ec4j-core = { module = "org.ec4j.core:ec4j-core", version = "1.1.1" }
 gradle-docker-plugin = { module = "com.bmuschko:gradle-docker-plugin", version = "9.4.0" }
-grgit-gradle = { module = "org.ajoberstar.grgit:grgit-gradle", version = "5.3.2" }
+grgit-gradle = { module = "org.ajoberstar.grgit:grgit-gradle", version = "5.3.3" }
 # shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version = "8.3.6" }
