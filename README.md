@@ -95,6 +95,21 @@ See [RepoConfig](./convention-plugins/src/main/groovy/to/wetransform/gradle/conv
 
 ### Configure the Java version
 
+Preferred way to configure the Java version is to use a `mise.toml` file or `.java-version` file in the root of the project.
+
+Example `mise.toml` file:
+
+```toml
+[tools]
+java = "temurin-17"
+```
+
+For more information see the [mise documentation](https://mise.jdx.dev/lang/java.html).
+
+Alternatively, you can use a `.java-version` file containing the Java version.
+
+If you do not use any of these files, you can set the Java version using the plugin configuration:
+
 ```groovy
 wetransform {
   setup {
