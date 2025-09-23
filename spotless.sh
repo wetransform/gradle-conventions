@@ -29,8 +29,20 @@
 
 set -e
 
+# Detect macOS and set realpath command
+if [[ "$(uname)" == "Darwin" ]]; then
+  if ! command -v grealpath >/dev/null 2>&1; then
+    echo "Error: 'grealpath' not found. Please install coreutils with:"
+    echo "  brew install coreutils"
+    exit 1
+  fi
+  realpath_cmd="grealpath"
+else
+  realpath_cmd="realpath"
+fi
+
 # Define the list of allowed file extensions
-allowed_extensions=("java" "md" "groovy" "gradle" "kt")
+allowed_extensions=("java" "md" "groovy" "gradle" "kt" "scala" "sc")
 
 # Check if a file path is provided
 if [ -z "$1" ]; then
@@ -50,29 +62,29 @@ if [[ ! "${allowed_extensions[@]}" =~ "${file_extension}" ]]; then
 fi
 
 # Get the absolute path of the provided file
-file_path=$(realpath "$1")
+file_path=$($realpath_cmd "$1")
 
 # Get the directory containing the file
 current_dir=$(dirname "$file_path")
 
 # Get the directory where the script resides
-script_dir=$(dirname "$(realpath "$0")")
+script_dir=$(dirname "$($realpath_cmd "$0")")
 
-# Traverse up the directory tree to find the first parent directory with build.gradle
+# Traverse up the directory tree to find the first parent directory with build.gradle or build.gradle.kts
 while [ "$current_dir" != "/" ]; do
-  if [ -f "$current_dir/build.gradle" ]; then
+  if [ -f "$current_dir/build.gradle" ] || [ -f "$current_dir/build.gradle.kts" ]; then
     # Determine the relative path from the script's directory
-    relative_path=$(realpath --relative-to="$script_dir" "$current_dir")
+    relative_path=$($realpath_cmd --relative-to="$script_dir" "$current_dir")
 
     # Check if the folder is the same as the script directory
     if [ "$current_dir" == "$script_dir" ]; then
-      echo "Found build.gradle in the project root: $relative_path"
+      echo "Found build.gradle(.kts) in the project root: $relative_path"
 
       exec ./gradlew :spotlessApply "-PspotlessIdeHook=$file_path" --parallel --configure-on-demand
     else
       # Replace / with : in the relative path
       formatted_path=$(echo "$relative_path" | tr '/' ':')
-      echo "Found build.gradle in a subfolder: $formatted_path"
+      echo "Found build.gradle(.kts) in a subfolder: $formatted_path"
 
       exec ./gradlew ":$formatted_path:spotlessApply" "-PspotlessIdeHook=$file_path" --parallel --configure-on-demand
     fi
@@ -87,5 +99,5 @@ while [ "$current_dir" != "/" ]; do
   current_dir=$(dirname "$current_dir")
 done
 
-echo "No build.gradle found within the script's directory."
+echo "No build.gradle or build.gradle.kts found within the script's directory."
 exit 1
