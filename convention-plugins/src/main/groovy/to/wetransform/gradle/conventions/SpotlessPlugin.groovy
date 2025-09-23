@@ -217,12 +217,16 @@ class SpotlessPlugin implements Plugin<Project> {
         def targetFile = project.rootProject.file('spotless.sh')
         copyResourceToFile('/spotless.sh', targetFile)
 
+        // create spotless.bat script for Windows
+        def targetFileWin = project.rootProject.file('spotless.bat')
+        copyResourceToFile('/spotless.bat', targetFileWin)
+
         // automatically create the .idea/watcherTasks.xml file
         def ideaFolder = project.rootProject.file('.idea')
         if (ideaFolder.exists()) {
           def ideaFile = new File(ideaFolder, 'watcherTasks.xml')
           if (!ideaFile.exists()) {
-            copyResourceToFile('/watcherTasks.xml', ideaFile)
+            configureWatcherTasks(project, ideaFile)
           }
           else {
             project.logger.warn("File ${ideaFile} already exists. Skipping creation.")
@@ -238,7 +242,7 @@ class SpotlessPlugin implements Plugin<Project> {
         def ideaFolder = project.rootProject.file('.idea')
         ideaFolder.mkdirs()
         def ideaFile = new File(ideaFolder, 'watcherTasks.xml')
-        copyResourceToFile('/watcherTasks.xml', ideaFile)
+        configureWatcherTasks(project, ideaFile)
       }
     }
   }
@@ -258,6 +262,19 @@ class SpotlessPlugin implements Plugin<Project> {
       }
     } finally {
       resource?.close()
+    }
+  }
+
+  void configureWatcherTasks(Project project, File targetFile) {
+    copyResourceToFile('/watcherTasks.xml', targetFile)
+
+    // determine if Windows
+    def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+    if (isWindows) {
+      // replace the sh script with the bat script in the configuration
+      def text = targetFile.text
+      text = text.replace('spotless.sh', 'spotless.bat')
+      targetFile.text = text
     }
   }
 }
