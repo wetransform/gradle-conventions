@@ -174,7 +174,8 @@ To automatically format the code run:
 ./gradlew spotlessApply
 ```
 
-You can run the task `generateSpotlessScript` to generate a script that can be used to run apply the formatting:
+You can run the task `generateSpotlessScript` to generate a script that can be used to run apply the formatting.
+The script is named `spotless.sh` and is generated in the root of the project. There is also a `spotless.bat` for Windows.
 
 ```bash
 ./spotless.sh

@@ -74,5 +74,8 @@ class SpotlessPluginTest extends PluginTest {
     def scriptFile = new File(testProjectDir, 'spotless.sh')
     scriptFile.exists()
     scriptFile.text.contains('spotlessApply')
+    def scriptFileWin = new File(testProjectDir, 'spotless.bat')
+    scriptFileWin.exists()
+    scriptFileWin.text.contains('spotlessApply')
   }
 }
