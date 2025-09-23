@@ -22,6 +22,7 @@ dependencies {
   implementation libs.ec4j.core
   implementation libs.gradle.docker.plugin
   implementation libs.grgit.gradle
+  implementation libs.jtoml
 }
 
 dependencies {

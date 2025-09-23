@@ -27,6 +27,8 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 
+import io.github.wasabithumb.jtoml.JToml
+
 @CompileStatic
 class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
@@ -86,17 +88,31 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
   @CompileStatic(TypeCheckingMode.SKIP) // skip because Kotlin extension type is not available at compile time
   def void setup(Project project) {
+    String javaV = null
     if (javaVersion.isPresent()) {
+      javaV = javaVersion.get()
+    }
+    if (javaV == null) {
+      javaV = JavaVersionHelper.determineDefaultJavaVersion(project.projectDir)
+      if (javaV == null) {
+        javaV = JavaVersionHelper.determineDefaultJavaVersion(project.rootProject.projectDir)
+      }
+      if (javaV != null) {
+        project.logger.info("Auto-detected Java version from configuration file: ${javaV}")
+      }
+    }
+
+    if (javaV != null) {
       if (ProjectHelper.hasJava(project)) {
         project.extensions.configure(JavaPluginExtension) { java ->
-          java.toolchain.languageVersion.set(JavaLanguageVersion.of(javaVersion.get()))
+          java.toolchain.languageVersion.set(JavaLanguageVersion.of(javaV))
         }
       }
 
       if (ProjectHelper.hasKotlin(project)) {
         // org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
         project.extensions.configure('kotlin') { kotlin ->
-          kotlin.jvmToolchain(JavaLanguageVersion.of(javaVersion.get()).asInt())
+          kotlin.jvmToolchain(JavaLanguageVersion.of(javaV).asInt())
         }
       }
     }
