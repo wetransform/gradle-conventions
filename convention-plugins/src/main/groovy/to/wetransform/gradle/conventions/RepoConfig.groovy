@@ -65,4 +65,18 @@ class RepoConfig {
       mavenLocal()
     }
   }
+
+  void maven(String repoUrl) {
+    project.repositories {
+      maven {
+        url repoUrl
+      }
+    }
+  }
+
+  void maven(Closure config) {
+    project.repositories {
+      maven(config)
+    }
+  }
 }

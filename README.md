@@ -91,6 +91,19 @@ wetransform {
 }
 ```
 
+There are also convenience methods for using Maven repositories like Maven Central or JCenter, similar to how it would be usually done in Gradle.
+
+```groovy
+wetransform {
+  repos {
+    // convenience methods for Maven repositories
+    mavenCentral()
+    mavenLocal()
+    maven('<url>')
+  }
+}
+```
+
 See [RepoConfig](./convention-plugins/src/main/groovy/to/wetransform/gradle/conventions/RepoConfig.groovy) for more information on the available repositories.
 
 ### Configure the Java version

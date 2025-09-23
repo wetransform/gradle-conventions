@@ -51,6 +51,70 @@ class ReposWetransformPluginTest extends PluginTest {
     result.task(":test").outcome == TaskOutcome.SUCCESS
   }
 
+  def "can resolve a dependency from a Maven repository with a custom definition with url as parameter"() {
+    setup:
+    buildFile.text = """
+    plugins {
+      id 'java'
+      id 'to.wetransform.conventions'
+    }
+
+    wetransform {
+      repos {
+        mavenCentral()
+        maven('https://artifactory.wetransform.to/artifactory/local')
+      }
+    }
+
+    dependencies {
+      implementation('eu.esdihumboldt.hale:eu.esdihumboldt.util.config:6.2.2')
+      testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.2')
+    }
+    """.stripIndent()
+
+    and: "A test class"
+    createTestClass()
+
+    when:
+    def result = runTask('test')
+
+    then:
+    result.task(":test").outcome == TaskOutcome.SUCCESS
+  }
+
+  def "can resolve a dependency from a Maven repository with a custom definition using closure"() {
+    setup:
+    buildFile.text = """
+    plugins {
+      id 'java'
+      id 'to.wetransform.conventions'
+    }
+
+    wetransform {
+      repos {
+        mavenCentral()
+        maven {
+          url 'https://artifactory.wetransform.to/artifactory/local'
+        }
+      }
+    }
+
+    dependencies {
+      implementation('eu.esdihumboldt.hale:eu.esdihumboldt.util.config:6.2.2')
+      testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.2')
+    }
+    """.stripIndent()
+
+    and: "A test class"
+    createTestClass()
+
+    when:
+    def result = runTask('test')
+
+    then:
+    result.task(":test").outcome == TaskOutcome.SUCCESS
+  }
+
   def "creates a version lockfile if prompted to write locks"() {
     setup:
     buildFile << """
