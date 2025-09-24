@@ -1,3 +1,23 @@
+## [2.2.0](https://github.com/wetransform/gradle-conventions/compare/v2.1.0...v2.2.0) (2025-09-24)
+
+### Features
+
+* auto-detect Java version from mise.toml or .java-version ([7a05a39](https://github.com/wetransform/gradle-conventions/commit/7a05a39bb7a0f72a3a61ca766f8eea975d3107a6))
+* **spotless:** add Windows specific script for applying formatting ([ea16d77](https://github.com/wetransform/gradle-conventions/commit/ea16d778003102207914f7c3137284dc4c13ba9b))
+* **spotless:** script also supports build.gradle.kts files ([e504ffb](https://github.com/wetransform/gradle-conventions/commit/e504ffb63735bbf6253006a5c4c1767bad0dd443))
+* **spotless:** support running script on macOS ([2410e30](https://github.com/wetransform/gradle-conventions/commit/2410e3022642d8d68e50bb61582c7c9a7a713277))
+* support defining custom Maven repos ([0a698bf](https://github.com/wetransform/gradle-conventions/commit/0a698bf6545eb161a881ce96aa3726890a3c1acb))
+
+### Bug Fixes
+
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v7.0.4 ([c199fe7](https://github.com/wetransform/gradle-conventions/commit/c199fe7d435d2102cffc4ddb56e805b68fbe663f))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v7.1.0 ([dde4d59](https://github.com/wetransform/gradle-conventions/commit/dde4d597148bc66264060cd2baf4b38addcce9bf))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v7.2.0 ([6beddb5](https://github.com/wetransform/gradle-conventions/commit/6beddb5ebde1007fa4ba0e4157e365824fd3c599))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v7.2.1 ([2b72e29](https://github.com/wetransform/gradle-conventions/commit/2b72e293148f2dcc7996061aa2bb91fbd0b3669e))
+* **deps:** update dependency org.ajoberstar.grgit:grgit-gradle to v5.3.2 ([de638f0](https://github.com/wetransform/gradle-conventions/commit/de638f02b43a5f50a94bd3bd5cbf14151c3b7b96))
+* **deps:** update dependency org.ajoberstar.grgit:grgit-gradle to v5.3.3 ([7a82865](https://github.com/wetransform/gradle-conventions/commit/7a82865266779b5df3f8e006517ea9926d48d5fd))
+* **deps:** update dependency to.wetransform:gradle-semantic-release-version to v2.1.3 ([133d3ea](https://github.com/wetransform/gradle-conventions/commit/133d3eaacff0eedbf8b4bb84048c2f5b81baf202))
+
 ## [2.1.0](https://github.com/wetransform/gradle-conventions/compare/v2.0.0...v2.1.0) (2025-05-22)
 
 ### Features
