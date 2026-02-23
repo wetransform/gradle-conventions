@@ -1,3 +1,21 @@
+## [2.3.0](https://github.com/wetransform/gradle-conventions/compare/v2.2.0...v2.3.0) (2026-02-23)
+
+### Features
+
+* add support for generating spotless watcher automatically ([08c7a92](https://github.com/wetransform/gradle-conventions/commit/08c7a92682a8e0a72733ebf9a0aa840f683d8511))
+* declare output for spotless watcher task ([d311ea4](https://github.com/wetransform/gradle-conventions/commit/d311ea43ba7923cebf90c0f1465b15a67c629129))
+
+### Bug Fixes
+
+* **deps:** update dependency com.bmuschko:gradle-docker-plugin to v10 ([3f69399](https://github.com/wetransform/gradle-conventions/commit/3f69399b0247bd6e24e8672c2ff3d7e5430d0464))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8 ([a331593](https://github.com/wetransform/gradle-conventions/commit/a33159337413e0a376cac025cefe7b26ed7ab8ff))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.1.0 ([f4c562e](https://github.com/wetransform/gradle-conventions/commit/f4c562e5c474cd490e3829b20309cce6f461c3bf))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.2.1 ([112406c](https://github.com/wetransform/gradle-conventions/commit/112406c07f07f75981d556f017c77a50c422936a))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.4.1 ([437b663](https://github.com/wetransform/gradle-conventions/commit/437b66330628393d4895a9a928bd6d69894971da))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.4.2 ([4422654](https://github.com/wetransform/gradle-conventions/commit/44226545438a4da653223c164c3e7c75e4c33770))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.5.0 ([5b6a853](https://github.com/wetransform/gradle-conventions/commit/5b6a853f683777748b1a548c42904d4c2a9519fb))
+* **deps:** update dependency org.ec4j.core:ec4j-core to v1.2.0 ([be3b5c2](https://github.com/wetransform/gradle-conventions/commit/be3b5c24510d2aa4f8670b404df004f58c32c694))
+
 ## [2.2.0](https://github.com/wetransform/gradle-conventions/compare/v2.1.0...v2.2.0) (2025-09-24)
 
 ### Features
