@@ -79,6 +79,24 @@ wetransform {
 }
 ```
 
+### Common Gradle properties
+
+The plugin also provides some common Gradle properties that are usually set in `~/.gradle/gradle.properties`:
+
+```
+# Credentials for wetransform Artifactory, required for publishing artifacts or accessing private repositories
+wetfArtifactoryUser=<username>
+wetfArtifactoryPassword=<password>
+
+# Local Docker settings, required for publishing to Docker Hub or using the Docker plugin in general
+dockerHost=unix:///var/run/docker.sock
+dockerHubUsername=<username>
+dockerHubPassword=<password-or-access-token>
+
+# Enable automatically generating a file watcher configuration applying spotless when formatting with IntelliJ Idea (see section "Integration in IntelliJ" below for more information)
+wetf.spotless.autoWatcher=true
+```
+
 ### Configure wetransform repositories
 
 ```groovy
@@ -199,7 +217,7 @@ You can also format a single file using the script:
 ./spotless.sh <file>
 ```
 
-#### Integration in IntellJ
+#### Integration in IntelliJ
 
 There are different ways to integrate the formatting into IntelliJ:
 
