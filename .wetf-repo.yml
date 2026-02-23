@@ -9,6 +9,5 @@ presets:
 
 workflows:
   presets:
-    - java-17
     - multi-module
     - skip-scan # currently not configured for scan

@@ -11,8 +11,6 @@ subprojects {
 
   wetransform {
     setup {
-      javaVersion(17)
-
       spotless {
         licenseHeader = APACHE
       }

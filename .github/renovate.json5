@@ -1,7 +1,8 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    "github>wetransform/renovate-config:self-hosted.json5"
+    "github>wetransform/renovate-config:self-hosted.json5",
+    "github>wetransform/renovate-config:java-17.json5"
   ],
   packageRules: [
     {
