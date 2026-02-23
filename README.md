@@ -1,5 +1,4 @@
-gradle-conventions
-==================
+# gradle-conventions
 
 Gradle plugins for applying conventions to Java, Kotlin, and Groovy projects.
 
