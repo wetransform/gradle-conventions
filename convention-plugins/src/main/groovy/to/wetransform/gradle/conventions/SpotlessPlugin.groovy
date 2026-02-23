@@ -28,6 +28,13 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 
 class SpotlessPlugin implements Plugin<Project> {
 
+  static final String PROPERTY_AUTO_WATCHER = 'wetf.spotless.autoWatcher'
+  static final String TASK_GENERATE_WATCHER = 'generateSpotlessWatcher'
+  static final String TASK_GENERATE_SCRIPT = 'generateSpotlessScript'
+  static final String SCRIPT_NAME_UNIX = 'spotless.sh'
+  static final String SCRIPT_NAME_WIN = 'spotless.bat'
+  static final List<String> AUTO_WATCHER_TRIGGER_TASKS = ['classes', 'testClasses']
+
   private final SpotlessConfig config
 
   private final Property<String> scalaVersion
@@ -209,17 +216,17 @@ class SpotlessPlugin implements Plugin<Project> {
   }
 
   void setupTasks(Project project) {
-    project.tasks.register('generateSpotlessScript') {
+    project.tasks.register(TASK_GENERATE_SCRIPT) {
       it.description = 'Generates a script to run spotless in the root project'
 
       it.doLast {
         // create spotless.sh script
-        def targetFile = project.rootProject.file('spotless.sh')
-        copyResourceToFile('/spotless.sh', targetFile)
+        def targetFile = project.rootProject.file(SCRIPT_NAME_UNIX)
+        copyResourceToFile("/${SCRIPT_NAME_UNIX}", targetFile)
 
         // create spotless.bat script for Windows
-        def targetFileWin = project.rootProject.file('spotless.bat')
-        copyResourceToFile('/spotless.bat', targetFileWin)
+        def targetFileWin = project.rootProject.file(SCRIPT_NAME_WIN)
+        copyResourceToFile("/${SCRIPT_NAME_WIN}", targetFileWin)
 
         // automatically create the .idea/watcherTasks.xml file
         def ideaFolder = project.rootProject.file('.idea')
@@ -235,17 +242,40 @@ class SpotlessPlugin implements Plugin<Project> {
       }
     }
 
-    project.tasks.register('generateSpotlessWatcher') { task ->
-      task.description = 'Generates a configuration for the IntelliJ file watcher plugin to run spotless.sh (overrides .idea/watcherTasks.xml)'
+    // Register generateSpotlessWatcher exactly once on the root project.
+    // Multiple subprojects may apply this plugin, but they all share the same
+    // output file (.idea/watcherTasks.xml), so a per-subproject task would
+    // produce overlapping outputs and race under --parallel.
+    def rootProject = project.rootProject
+    def watcherFlagKey = '_spotlessWatcherRegistered'
+    if (!rootProject.extensions.extraProperties.has(watcherFlagKey)) {
+      rootProject.extensions.extraProperties.set(watcherFlagKey, true)
+      rootProject.tasks.register(TASK_GENERATE_WATCHER) { task ->
+        task.description = 'Generates a configuration for the IntelliJ file watcher plugin to run spotless.sh (overrides .idea/watcherTasks.xml)'
 
-      def ideaFile = project.rootProject.file('.idea/watcherTasks.xml')
-      task.outputs.file(ideaFile)
+        def ideaFile = rootProject.file('.idea/watcherTasks.xml')
+        task.outputs.file(ideaFile)
 
-      task.doLast {
-        def ideaFolder = project.rootProject.file('.idea')
-        ideaFolder.mkdirs()
-        configureWatcherTasks(project, ideaFile)
-        project.logger.lifecycle("Generated IntelliJ watcherTasks.xml at: ${ideaFile}")
+        task.doLast {
+          rootProject.file('.idea').mkdirs()
+          configureWatcherTasks(rootProject, ideaFile)
+          rootProject.logger.lifecycle("Generated IntelliJ watcherTasks.xml at: ${ideaFile}")
+        }
+      }
+    }
+
+    // Auto-run generateSpotlessWatcher when conditions are met.
+    // Wire the current project's trigger tasks to the single root-level task.
+    def autoWatcherEnabled = project.hasProperty(PROPERTY_AUTO_WATCHER) &&
+      project.property(PROPERTY_AUTO_WATCHER).toBoolean()
+    def scriptExists = rootProject.file(SCRIPT_NAME_UNIX).exists() ||
+      rootProject.file(SCRIPT_NAME_WIN).exists()
+
+    if (autoWatcherEnabled && scriptExists) {
+      def watcherTask = rootProject.tasks.named(TASK_GENERATE_WATCHER)
+
+      project.tasks.matching { it.name in AUTO_WATCHER_TRIGGER_TASKS }.configureEach {
+        dependsOn(watcherTask)
       }
     }
   }
