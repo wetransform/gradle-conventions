@@ -235,14 +235,17 @@ class SpotlessPlugin implements Plugin<Project> {
       }
     }
 
-    project.tasks.register('generateSpotlessWatcher') {
-      it.description = 'Generates a configuration for the IntelliJ file watcher plugin to run spotless.sh (overrides .idea/watcherTasks.xml)'
+    project.tasks.register('generateSpotlessWatcher') { task ->
+      task.description = 'Generates a configuration for the IntelliJ file watcher plugin to run spotless.sh (overrides .idea/watcherTasks.xml)'
 
-      it.doLast {
+      def ideaFile = project.rootProject.file('.idea/watcherTasks.xml')
+      task.outputs.file(ideaFile)
+
+      task.doLast {
         def ideaFolder = project.rootProject.file('.idea')
         ideaFolder.mkdirs()
-        def ideaFile = new File(ideaFolder, 'watcherTasks.xml')
         configureWatcherTasks(project, ideaFile)
+        project.logger.lifecycle("Generated IntelliJ watcherTasks.xml at: ${ideaFile}")
       }
     }
   }
