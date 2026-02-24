@@ -24,7 +24,6 @@ jobs:
     uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@b8c149abb6fed430a99dbd7ca25a093ffe875ab1 # v4.0.0
     with:
       semantic-release-dryrun: ${{ inputs.dryRun }}
-      java-version: 17
       multi-module: true
       semantic-release: true
       skip-scan: true
