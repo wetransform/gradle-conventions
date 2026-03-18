@@ -171,6 +171,7 @@ class PublishPlugin implements Plugin<Project> {
           mainClassName = config.mainClass
         }
         ports = config.ports.convention([])
+        jvmArgs = config.jvmArgs.convention([])
         images = [
           "${config.imageName.get()}:${project.version}",
           "${config.imageName.get()}:latest"

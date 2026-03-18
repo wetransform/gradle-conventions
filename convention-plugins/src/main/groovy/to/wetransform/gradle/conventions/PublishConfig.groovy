@@ -15,6 +15,7 @@
  */
 package to.wetransform.gradle.conventions
 
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 
@@ -79,4 +80,9 @@ interface PublishConfig {
    * The ports to expose in the Docker image.
    */
   SetProperty<Integer> getPorts()
+
+  /**
+   * The JVM arguments to pass to the Docker container's entrypoint.
+   */
+  ListProperty<String> getJvmArgs()
 }
