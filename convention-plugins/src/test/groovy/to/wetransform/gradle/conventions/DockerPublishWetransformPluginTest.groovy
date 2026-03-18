@@ -31,6 +31,7 @@ class DockerPublishWetransformPluginTest extends PluginTest {
         publish {
           baseImage = 'eclipse-temurin:17-jre-jammy'
           mainClass = 'to.wetransform.test.Main'
+          jvmArgs = ['-Xmx512m']
         }
       }
     }
@@ -87,5 +88,8 @@ class DockerPublishWetransformPluginTest extends PluginTest {
     def versionLabel = (content =~ /LABEL .+ org\.opencontainers\.image\.version=([^\s]+)/)[0][1]
     assert sourceLabel == 'https://github.com/wetransform/test'
     assert versionLabel == '1.0.0-SNAPSHOT'
+
+    // check JVM args are present in the entrypoint
+    assert content.contains('-Xmx512m'), "JVM args are missing from the Dockerfile"
   }
 }
