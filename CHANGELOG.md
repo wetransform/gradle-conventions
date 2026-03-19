@@ -1,3 +1,15 @@
+## [2.4.0](https://github.com/wetransform/gradle-conventions/compare/v2.3.0...v2.4.0) (2026-03-19)
+
+### Features
+
+* support passing JVM arguments to Docker application ([47b51ca](https://github.com/wetransform/gradle-conventions/commit/47b51caf21b61a2da543cc5ffef23879a4f9de1c))
+
+### Bug Fixes
+
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.3.0 ([c926bc9](https://github.com/wetransform/gradle-conventions/commit/c926bc9e9236c5c58f44d86a87bdaa356162c17a))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.5.1 ([05a754b](https://github.com/wetransform/gradle-conventions/commit/05a754bf216025dde0d2daa77dc9458f93787df8))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.5.2 ([c7f2f09](https://github.com/wetransform/gradle-conventions/commit/c7f2f098c6ec3f43de58c5af3562635fb0bf8fa1))
+
 ## [2.3.0](https://github.com/wetransform/gradle-conventions/compare/v2.2.0...v2.3.0) (2026-02-23)
 
 ### Features
