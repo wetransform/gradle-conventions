@@ -33,7 +33,12 @@ class DefaultSettingsPluginTest extends PluginTest {
     buildFile << """
     plugins { id 'java' }
     repositories { mavenCentral() }
-    dependencies { testImplementation(testLibs.junit) }
+    dependencies {
+      testImplementation(testLibs.junit)
+      testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.2')
+      testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    }
+    test { useJUnitPlatform() }
     """.stripIndent()
 
     and: "A test class"

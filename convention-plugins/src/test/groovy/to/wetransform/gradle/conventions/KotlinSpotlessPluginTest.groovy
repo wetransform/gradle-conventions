@@ -22,7 +22,7 @@ class KotlinSpotlessPluginTest extends PluginTest {
   def setup() {
     buildFile << """
     plugins {
-      id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+      id 'org.jetbrains.kotlin.jvm' version '2.1.0'
       id 'to.wetransform.conventions.spotless'
     }
 

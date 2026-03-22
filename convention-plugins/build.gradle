@@ -31,6 +31,12 @@ dependencies {
   testRuntimeOnly testLibs.junit.platform.launcher
 }
 
+configurations.all {
+  resolutionStrategy.capabilitiesResolution.withCapability('org.codehaus.groovy:groovy') {
+    selectHighestVersion()
+  }
+}
+
 test {
   useJUnitPlatform()
 }
