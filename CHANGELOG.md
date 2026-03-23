@@ -1,3 +1,17 @@
+## [3.0.0](https://github.com/wetransform/gradle-conventions/compare/v2.4.0...v3.0.0) (2026-03-23)
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** update gradle to v9
+
+### Bug Fixes
+
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.4.0 ([5890b65](https://github.com/wetransform/gradle-conventions/commit/5890b6505a18a55e7b24978b4b902daa03bf7cdd))
+
+### Miscellaneous Chores
+
+* **deps:** update gradle to v9 ([e768ee2](https://github.com/wetransform/gradle-conventions/commit/e768ee28bef79aa887e723250e5ae811b8b78e1c))
+
 ## [2.4.0](https://github.com/wetransform/gradle-conventions/compare/v2.3.0...v2.4.0) (2026-03-19)
 
 ### Features
