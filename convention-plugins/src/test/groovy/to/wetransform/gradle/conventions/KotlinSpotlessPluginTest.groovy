@@ -92,4 +92,71 @@ class KotlinSpotlessPluginTest extends PluginTest {
     then:
     result.task(":spotlessKotlinCheck").outcome == TaskOutcome.SUCCESS
   }
+
+  def "respects multiple ktlint rules disabled in editorconfig"() {
+    given:
+    // Two ktlint rules disabled: package-name and filename
+    new File(testProjectDir, '.editorconfig') << """\
+    root = true
+
+    [*.kt]
+    indent_style = space
+    indent_size = 2
+    ktlint_standard_package-name = disabled
+    ktlint_standard_filename = disabled
+    """.stripIndent()
+
+    new File(testProjectDir, 'src/main/kotlin').mkdirs()
+    // Violates package-name (capital E) and filename (file is Test.kt but class is Foo)
+    new File(testProjectDir, 'src/main/kotlin/Test.kt') << """\
+    /*
+     * Copyright (c) 2025 wetransform GmbH
+     * All rights reserved.
+     */
+    package com.Example
+
+    class Foo(val x: Int)
+    """.stripIndent()
+
+    when:
+    def result = runTask('spotlessCheck')
+
+    then:
+    result.task(":spotlessKotlinCheck").outcome == TaskOutcome.SUCCESS
+  }
+
+  def "respects property-naming rule disabled in editorconfig"() {
+    given:
+    // Disable package-name (first) and property-naming (second)
+    new File(testProjectDir, '.editorconfig') << """\
+    root = true
+
+    [*.kt]
+    indent_style = space
+    indent_size = 2
+    ktlint_standard_package-name = disabled
+    ktlint_standard_property-naming = disabled
+    """.stripIndent()
+
+    new File(testProjectDir, 'src/main/kotlin').mkdirs()
+    // Violates package-name (capital E) and property-naming (CSWTClient is not camelCase)
+    new File(testProjectDir, 'src/main/kotlin/Test.kt') << """\
+    /*
+     * Copyright (c) 2025 wetransform GmbH
+     * All rights reserved.
+     */
+    package com.Example
+
+    fun main() {
+      val CSWTClient = "client"
+      println(CSWTClient)
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('spotlessCheck')
+
+    then:
+    result.task(":spotlessKotlinCheck").outcome == TaskOutcome.SUCCESS
+  }
 }
