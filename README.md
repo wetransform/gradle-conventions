@@ -237,6 +237,34 @@ For more information on how to set up the file watcher, see the documentation in
 
 When generating the `spotless.sh` script using the `generateSpotlessScript` task, if a `.idea` folder is present, a `watcherTasks.xml` file is generated automatically, if it is not already present.
 
+### Code coverage with JaCoCo
+
+By default, [JaCoCo](https://www.jacoco.org/jacoco/) is applied automatically for projects with Java, Kotlin, Groovy, or Scala sources. The `jacocoTestReport` task is bound to the `test` task lifecycle, and XML + HTML reports are enabled.
+
+To disable JaCoCo:
+
+```groovy
+wetransform {
+  setup {
+    jacoco {
+      disable = true
+    }
+  }
+}
+```
+
+To pin a specific JaCoCo tool version:
+
+```groovy
+wetransform {
+  setup {
+    jacoco {
+      toolVersion = '0.8.12'
+    }
+  }
+}
+```
+
 ### Configure publishing
 
 For an overview on all available publishing options, see [PublishConfig](./convention-plugins/src/main/groovy/to/wetransform/gradle/conventions/PublishConfig.groovy).

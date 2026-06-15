@@ -36,6 +36,8 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
   private final PublishConfig publishConfig
 
+  private final JacocoConfig jacocoConfig
+
   private final Property<String> javaVersion
 
   private final Property<String> scalaVersion
@@ -50,6 +52,7 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
 
     this.spotlessConfig = objectFactory.newInstance(SpotlessConfig)
     this.publishConfig = objectFactory.newInstance(PublishConfig)
+    this.jacocoConfig = objectFactory.newInstance(JacocoConfig)
     this.javaVersion = objectFactory.property(String)
     this.scalaVersion = objectFactory.property(String)
     this.activateDependencyLocking = objectFactory.property(Boolean)
@@ -69,6 +72,11 @@ class WetransformPlugin implements Plugin<Project>, ConfigProvider {
   @Override
   PublishConfig getPublishConfig() {
     return publishConfig
+  }
+
+  @Override
+  JacocoConfig getJacocoConfig() {
+    return jacocoConfig
   }
 
   @Override

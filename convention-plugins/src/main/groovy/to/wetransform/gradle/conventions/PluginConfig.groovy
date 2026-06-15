@@ -39,6 +39,10 @@ class PluginConfig {
     action.execute(configProvider.publishConfig)
   }
 
+  void jacoco(Action<JacocoConfig> action) {
+    action.execute(configProvider.jacocoConfig)
+  }
+
   void javaVersion(def version) {
     configProvider.javaVersion.set(version as String)
   }

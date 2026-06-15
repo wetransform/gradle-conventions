@@ -20,13 +20,14 @@ import groovy.transform.CompileStatic
 import org.gradle.api.provider.Property
 
 @CompileStatic
-interface ConfigProvider {
-  SpotlessConfig getSpotlessConfig()
-  PublishConfig getPublishConfig()
-  JacocoConfig getJacocoConfig()
+interface JacocoConfig {
+  /**
+   * @return <code>true</code> if JaCoCo code coverage should be disabled, default is <code>false</code>
+   */
+  Property<Boolean> getDisable()
 
-  Property<String> getJavaVersion()
-  Property<String> getScalaVersion()
-
-  Property<Boolean> getActivateDependencyLocking()
+  /**
+   * @return the JaCoCo tool version to use, if not set the Gradle default is used
+   */
+  Property<String> getToolVersion()
 }
