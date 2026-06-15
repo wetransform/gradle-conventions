@@ -83,6 +83,9 @@ class PluginExtension {
 
     def publish = new PublishPlugin(objectFactory, plugin.publishConfig, plugin)
     publish.apply(project)
+
+    def jacoco = new JacocoPlugin(objectFactory, plugin.jacocoConfig)
+    jacoco.apply(project)
   }
 
   void config(Action<PluginConfig> action) {
