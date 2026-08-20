@@ -1,3 +1,15 @@
+## [3.1.0](https://github.com/wetransform/gradle-conventions/compare/v3.0.0...v3.1.0) (2026-08-20)
+
+### Features
+
+* add code coverage using jacoco ([70a87f1](https://github.com/wetransform/gradle-conventions/commit/70a87f16a5f28ff984111be56ffb565febb53a51)), closes [ING-5219](https://wetransform.atlassian.net/browse/ING-5219)
+
+### Bug Fixes
+
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.5.1 ([cb69711](https://github.com/wetransform/gradle-conventions/commit/cb69711ce15f5d719d06f9a0454c2167f7b87edf))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.6.0 ([2de56e4](https://github.com/wetransform/gradle-conventions/commit/2de56e4bb8fa0d2edce85f61d94808759ea7d26c))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.9.0 ([dd449d3](https://github.com/wetransform/gradle-conventions/commit/dd449d3be8e47988ca51ae6ca609ccb0a43ecf99))
+
 ## [3.0.0](https://github.com/wetransform/gradle-conventions/compare/v2.4.0...v3.0.0) (2026-03-23)
 
 ### ⚠ BREAKING CHANGES
