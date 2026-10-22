@@ -238,6 +238,28 @@ class SpotlessP2FallbackPluginTest extends PluginTest {
     !result.output.contains(WARNING)
   }
 
+  def "auto skips without network access when offline"() {
+    given:
+    // all sites healthy, so only the offline check can lead to skipping;
+    // with the test overrides the local P2 cache is not probed, i.e. it counts as cold
+    startServer({ String path ->
+      path.endsWith('/p2.index') ? validIndex() : null
+    })
+    buildFile << """
+    plugins {
+      id 'to.wetransform.conventions.spotless'
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('help', p2Args('--offline'))
+
+    then:
+    result.output.contains(WARNING)
+    result.output.contains('Reason: offline and P2 cache is cold')
+    server.requests.isEmpty()
+  }
+
   def "health check runs once per build in multi-project build"() {
     given:
     startServer({ String path ->

@@ -198,19 +198,19 @@ wetransform {
 #### Eclipse P2 outages
 
 The Groovy-Eclipse formatter (Groovy and Gradle files) is downloaded from P2 update sites, mainly `download.eclipse.org`.
-In the default `auto` mode the plugin checks these sites once per build:
-if `download.eclipse.org` is unavailable, a healthy Eclipse mirror is used instead; if no source is usable, the Groovy-Eclipse formatting is skipped.
+In the default `auto` mode the plugin decides once per build: if the local P2 cache already holds the formatter, the sites are not checked at all;
+otherwise, if `download.eclipse.org` is unavailable, a healthy Eclipse mirror is used; if no source is usable (or with `--offline` and a cold cache), Groovy-Eclipse formatting is skipped.
 Other spotless settings (license header, whitespace, line endings) are still enforced.
 
 The behaviour can be forced with `-Pwetf.spotless.p2.mode=<mode>`:
 
-- `auto` (default): check the sites, fall back to a mirror or skip
+- `auto` (default): use the local cache or check the sites, fall back to a mirror or skip
 - `original`: always use `download.eclipse.org`
 - `mirror`: always use the first mirror
 - `skip`: do not apply the Groovy-Eclipse formatter
 
 The mirrors can be configured with `-Pwetf.spotless.p2.mirrors=<comma-separated mirror base URLs>`, e.g. `https://ftp.fau.de/eclipse`.
-When formatting is skipped, a warning is printed on each build (and a warning annotation on GitHub Actions).
+When formatting is skipped, a warning is printed at configuration time and, also on configuration cache hits, when `spotlessCheck`/`spotlessApply` run (plus a warning annotation on GitHub Actions).
 
 #### General use of spotless
 

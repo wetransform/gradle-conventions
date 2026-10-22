@@ -76,4 +76,30 @@ class GrEclipseReposSpec extends Specification {
     SpotlessPlugin.lookupFailureWarning(info.failure) ==
       'Spotless: could not determine Groovy-Eclipse P2 repositories (java.lang.NullPointerException), using download.eclipse.org without health check'
   }
+
+  def "query cache key depends on the mirror map"() {
+    given:
+    def version = GrEclipseRepos.defaultEclipseVersion()
+
+    when:
+    def original = GrEclipseRepos.queryCacheKey(version, [:])
+    def mirrored = GrEclipseRepos.queryCacheKey(version, P2Source.mirror('https://ftp.fau.de/eclipse', 'test').mirrorMap())
+
+    then:
+    original ==~ /\d+(\.\d+)*-?\d+/
+    mirrored ==~ /\d+(\.\d+)*-?\d+/
+    original != mirrored
+    GrEclipseRepos.queryCacheKey(version, [:]) == original
+  }
+
+  def "query cache keys match the directories observed in the spike"() {
+    // Without network access. The keys include the Solstice version, which is read at runtime,
+    // and the P2 model hash; they are asserted exactly anyway, to detect cache key changes on spotless updates
+    // (values from the spike, see docs/superpowers/specs/2026-10-22-spotless-p2-fallback-spike-notes.md).
+    expect:
+    GrEclipseRepos.queryCacheKey('4.41', [:]) == '1.8.2-1606393269'
+    GrEclipseRepos.queryCacheKey('4.41', P2Source.mirror('https://ftp.fau.de/eclipse', 'x').mirrorMap()) == '1.8.2-1092931831'
+    GrEclipseRepos.queryCacheKey('4.41', P2Source.mirror('https://ftp.halifax.rwth-aachen.de/eclipse', 'x').mirrorMap()) == '1.8.21852791274'
+    GrEclipseRepos.queryCacheKey('4.41', P2Source.mirror('https://mirror.ibcp.fr/pub/eclipse', 'x').mirrorMap()) == '1.8.2-1896980745'
+  }
 }
