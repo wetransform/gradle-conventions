@@ -15,12 +15,19 @@
  */
 package to.wetransform.gradle.conventions
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import javax.inject.Inject
 
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
 
 import com.diffplug.gradle.spotless.BaseKotlinExtension
 import com.diffplug.gradle.spotless.FormatExtension
@@ -29,6 +36,16 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 class SpotlessPlugin implements Plugin<Project> {
 
   static final String PROPERTY_AUTO_WATCHER = 'wetf.spotless.autoWatcher'
+  static final String PROPERTY_P2_MODE = 'wetf.spotless.p2.mode'
+  static final String PROPERTY_P2_MIRRORS = 'wetf.spotless.p2.mirrors'
+  /** Internal: overrides {@link P2SourceDecider#ORIGINAL_BASE}, used by tests. */
+  static final String PROPERTY_P2_ORIGINAL_BASE = 'wetf.spotless.p2.originalBase'
+  /** Internal: overrides the Groovy-Eclipse repository URL for the health check only, used by tests. */
+  static final String PROPERTY_P2_GRECLIPSE_REPO = 'wetf.spotless.p2.greclipseRepo'
+  static final List<String> P2_SKIP_WARNING_TASKS = [
+    'spotlessCheck',
+    'spotlessApply'
+  ]
   static final String TASK_GENERATE_WATCHER = 'generateSpotlessWatcher'
   static final String TASK_GENERATE_SCRIPT = 'generateSpotlessScript'
   static final String SCRIPT_NAME_UNIX = 'spotless.sh'
@@ -60,6 +77,11 @@ class SpotlessPlugin implements Plugin<Project> {
 
     project.plugins.apply('com.diffplug.spotless')
 
+    P2Source p2Source = resolveP2Source(project)
+    if (p2Source.kind == P2Source.Kind.SKIP) {
+      registerSkipWarning(project, p2Source)
+    }
+
     EditorConfigHelper ech = new EditorConfigHelper(project.rootProject.projectDir)
 
     project.extensions.configure(SpotlessExtension) { spotless ->
@@ -67,9 +89,7 @@ class SpotlessPlugin implements Plugin<Project> {
 
       spotless.groovyGradle {
         it.target '*.gradle'
-        it.greclipse().configProperties(
-          EclipseFormatProperties.getPropertiesAsString(gradleConfig, true)
-          )
+        applyGreclipse(it, EclipseFormatProperties.getPropertiesAsString(gradleConfig, true), p2Source)
 
         applyGenericSettings(it, gradleConfig)
       }
@@ -95,7 +115,7 @@ class SpotlessPlugin implements Plugin<Project> {
           it.importOrder('groovy', 'java', 'javax', 'org', 'com', '')
 
           // https://github.com/diffplug/spotless/tree/main/plugin-gradle#eclipse-groovy
-          it.greclipse().configProperties(EclipseFormatProperties.getPropertiesAsString(groovyConfig, true))
+          applyGreclipse(it, EclipseFormatProperties.getPropertiesAsString(groovyConfig, true), p2Source)
 
           // excludes all Java sources within the Groovy source dirs from formatting
           it.excludeJava()
@@ -186,6 +206,149 @@ class SpotlessPlugin implements Plugin<Project> {
     }
 
     setupTasks(project)
+  }
+
+  /**
+   * Determines the P2 source for the Groovy-Eclipse formatter, once per build
+   * (memoized on the root project).
+   */
+  P2Source resolveP2Source(Project project) {
+    def rootExt = project.rootProject.extensions.extraProperties
+    def key = '_spotlessP2Source'
+    if (rootExt.has(key)) {
+      return P2Source.decode(rootExt.get(key) as String)
+    }
+
+    def providers = project.providers
+    // validate early for a clear error message
+    P2Mode mode = P2Mode.parse(providers.gradleProperty(PROPERTY_P2_MODE).getOrNull())
+    String originalBase = providers.gradleProperty(PROPERTY_P2_ORIGINAL_BASE).getOrElse(P2SourceDecider.ORIGINAL_BASE)
+    List<String> mirrors = P2SourceDecider.parseMirrors(providers.gradleProperty(PROPERTY_P2_MIRRORS).getOrNull())
+
+    // Eclipse version and Groovy-Eclipse repository are only needed for the health check
+    String eclipseVersion = ''
+    String greclipseRepoUrl = ''
+    String lookupFailure = null
+    if (mode == P2Mode.AUTO) {
+      GrEclipseRepos.Info info = GrEclipseRepos.lookup(providers.gradleProperty(PROPERTY_P2_GRECLIPSE_REPO).getOrNull())
+      lookupFailure = info.failure
+      eclipseVersion = info.eclipseVersion ?: ''
+      greclipseRepoUrl = info.greclipseRepoUrl ?: ''
+    }
+
+    String encoded
+    if (lookupFailure != null) {
+      // without the repositories no health check is possible, so behave as without the fallback;
+      // the lookup only depends on the plugin classpath, which is part of the configuration cache key
+      project.logger.warn(lookupFailureWarning(lookupFailure))
+      encoded = P2Source.original(lookupFailure).encode()
+    } else {
+      // evaluated at configuration time, since it determines whether greclipse is applied;
+      // Gradle re-evaluates it on configuration cache hits to validate the cache entry
+      encoded = providers.of(P2SourceValueSource) { spec ->
+        spec.parameters.mode.set(mode.name())
+        spec.parameters.originalBase.set(originalBase)
+        spec.parameters.mirrors.set(mirrors)
+        spec.parameters.eclipseVersion.set(eclipseVersion)
+        spec.parameters.greclipseRepoUrl.set(greclipseRepoUrl)
+        spec.parameters.cacheWarm.set(false)
+      }.get()
+    }
+    rootExt.set(key, encoded)
+
+    P2Source source = P2Source.decode(encoded)
+    if (source.kind == P2Source.Kind.MIRROR) {
+      project.logger.lifecycle("Spotless: download.eclipse.org unavailable, using P2 mirror ${source.mirrorBase}")
+    } else if (source.kind == P2Source.Kind.SKIP) {
+      project.logger.warn(skipWarningBlock(source.reason))
+    }
+    source
+  }
+
+  static String lookupFailureWarning(String failure) {
+    "Spotless: ${failure}, using download.eclipse.org without health check".toString()
+  }
+
+  static String skipWarningBlock(String reason) {
+    [
+      '==========================================================================',
+      'WARNING: Groovy and Gradle file formatting was NOT checked (greclipse skipped).',
+      "Reason: ${reason}",
+      'Override with -Pwetf.spotless.p2.mode=original|mirror|skip',
+      'and -Pwetf.spotless.p2.mirrors=<comma-separated mirror base URLs>.',
+      '=========================================================================='
+    ].join('\n')
+  }
+
+  private void registerSkipWarning(Project project, P2Source source) {
+    String message = skipWarningBlock(source.reason)
+    String annotation = null
+    if (project.providers.environmentVariable('GITHUB_ACTIONS').getOrNull() == 'true') {
+      annotation = "::warning title=Spotless::Groovy and Gradle file formatting was NOT checked (greclipse skipped): ${source.reason}".toString()
+    }
+    Provider<AnnotationOnceService> once = null
+    if (annotation != null) {
+      try {
+        once = project.gradle.sharedServices.registerIfAbsent('spotlessP2SkipAnnotation', AnnotationOnceService) {}
+      } catch (Exception e) {
+        // e.g. plugin loaded by different class loaders; then the annotation is emitted per project
+        project.logger.debug('Spotless: could not register annotation service', e)
+      }
+    }
+    def action = new SkipWarningAction(message, annotation, once)
+    // configureEach does not force the realization of other tasks
+    project.tasks.configureEach { Task task ->
+      if (task.name in P2_SKIP_WARNING_TASKS) {
+        if (once != null) {
+          task.usesService(once)
+        }
+        task.doFirst(action)
+      }
+    }
+  }
+
+  /** Makes sure the GitHub Actions annotation is only emitted once per build. */
+  static abstract class AnnotationOnceService implements BuildService<BuildServiceParameters.None> {
+    private final AtomicBoolean emitted = new AtomicBoolean(false)
+
+    /** @return true only for the first call in a build */
+    boolean first() {
+      emitted.compareAndSet(false, true)
+    }
+  }
+
+  /** Task action logging the skip warning; configuration cache safe, as it only holds strings and a service provider. */
+  static class SkipWarningAction implements Action<Task> {
+    final String message
+    /** GitHub Actions annotation, or null. */
+    final String annotation
+    /** Deduplicates the annotation across projects, or null. */
+    final Provider<AnnotationOnceService> once
+
+    SkipWarningAction(String message, String annotation, Provider<AnnotationOnceService> once) {
+      this.message = message
+      this.annotation = annotation
+      this.once = once
+    }
+
+    @Override
+    void execute(Task task) {
+      task.logger.warn(message)
+      if (annotation != null && (once == null || once.get().first())) {
+        task.logger.warn(annotation)
+      }
+    }
+  }
+
+  void applyGreclipse(FormatExtension ext, String configProperties, P2Source source) {
+    if (source.kind == P2Source.Kind.SKIP) {
+      return
+    }
+    def greclipse = ext.greclipse()
+    greclipse.configProperties(configProperties)
+    if (source.kind == P2Source.Kind.MIRROR) {
+      greclipse.withP2Mirrors(source.mirrorMap())
+    }
   }
 
   void applyGenericSettings(FormatExtension ext, EditorConfigInfo config) {
