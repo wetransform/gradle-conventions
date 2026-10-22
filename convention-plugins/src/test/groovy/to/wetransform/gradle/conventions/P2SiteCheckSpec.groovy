@@ -110,9 +110,29 @@ class P2SiteCheckSpec extends Specification {
     new P2SiteCheck().check(start()).healthy
   }
 
-  def 'p2 index 403 falls back to content jar'() {
+  def 'p2 index 404 falls back to content jar'() {
     given:
     server.createContext('/') { ex ->
+      if (ex.requestURI.path.endsWith('/content.jar')) {
+        respond(ex, 200, 'application/java-archive', ([0x50, 0x4b, 3, 4, 0, 0] as byte[]))
+      } else {
+        respond(ex, 404, null, new byte[0])
+      }
+    }
+
+    when:
+    def result = new P2SiteCheck().check(start())
+
+    then:
+    result.healthy
+    result.reason.contains('content.jar')
+  }
+
+  def 'p2 index 403 is unhealthy'() {
+    given:
+    List<String> paths = []
+    server.createContext('/') { ex ->
+      paths << ex.requestURI.path
       if (ex.requestURI.path.endsWith('content.jar')) {
         respond(ex, 200, 'application/java-archive', ([0x50, 0x4b, 3, 4, 0, 0] as byte[]))
       } else {
@@ -120,8 +140,65 @@ class P2SiteCheckSpec extends Specification {
       }
     }
 
+    when:
+    def result = new P2SiteCheck().check(start())
+
+    then:
+    !result.healthy
+    result.reason.contains('403')
+    paths == ['/repo/p2.index']
+  }
+
+  def '403 html error page falls back to content jar'() {
+    given:
+    server.createContext('/') { ex ->
+      if (ex.requestURI.path.endsWith('/content.jar')) {
+        respond(ex, 200, 'application/java-archive', ([0x50, 0x4b, 3, 4, 0, 0] as byte[]))
+      } else {
+        respond(ex, 403, contentType, body.bytes)
+      }
+    }
+
     expect:
     new P2SiteCheck().check(start()).healthy
+
+    where:
+    contentType   | body
+    'text/plain'  | '  \n<!doctype HTML><html><body>Forbidden</body></html>'
+    'text/html'   | '<html><body>Forbidden</body></html>'
+    null          | '<!DOCTYPE html><html><body>Forbidden</body></html>'
+  }
+
+  def '502 html error page is unhealthy'() {
+    given:
+    server.createContext('/') { ex ->
+      if (ex.requestURI.path.endsWith('content.jar')) {
+        respond(ex, 200, 'application/java-archive', ([0x50, 0x4b, 3, 4, 0, 0] as byte[]))
+      } else {
+        respond(ex, 502, 'text/html', '<!DOCTYPE html><html><body>Bad gateway</body></html>'.bytes)
+      }
+    }
+
+    when:
+    def result = new P2SiteCheck().check(start())
+
+    then:
+    !result.healthy
+    result.reason.contains('502')
+  }
+
+  def 'html page with status 200 is unhealthy even if content jar exists'() {
+    given:
+    server.createContext('/') { ex ->
+      if (ex.requestURI.path.endsWith('content.jar')) {
+        respond(ex, 200, 'application/java-archive', ([0x50, 0x4b, 3, 4, 0, 0] as byte[]))
+      } else {
+        respond(ex, 200, 'text/plain', '<!DOCTYPE html><html><body>Temporary shutdown</body></html>'.bytes)
+      }
+    }
+
+    expect:
+    !new P2SiteCheck().check(start()).healthy
   }
 
   def 'fallback jar served as html is unhealthy'() {
