@@ -34,8 +34,52 @@ class P2CacheProbe {
     (solsticeVersion + modelHash).replaceAll('[^a-zA-Z0-9-+_.]', '-').replaceAll('-+', '-')
   }
 
+  /** Solstice class of the cached query result ({@code QueryCacheOnDisk} stores it Java-serialized). */
+  static final String P2_QUERY_RESULT_CLASS = 'dev.equo.solstice.p2.P2QueryResult'
+
+  /** Classes that may occur in a serialized {@code P2QueryResult}. */
+  private static final String DESERIALIZATION_FILTER = "${P2_QUERY_RESULT_CLASS};java.util.*;java.io.File;java.lang.*;!*"
+
+  /**
+   * Checks whether the query cache for the key is usable without network access, i.e. its content is a
+   * {@code P2QueryResult} and all P2 jars it references still exist. Solstice uses a cached result as is,
+   * so a result referencing deleted jars would fail the build offline or during an outage.
+   * The cache is only read, never modified. Any failure counts as not warm.
+   */
   static boolean isWarm(File p2DataDir, String queryKey) {
-    new File(p2DataDir, "queries/${queryKey}/content").isFile()
+    try {
+      File content = new File(p2DataDir, "queries/${queryKey}/content")
+      if (!content.isFile()) {
+        return false
+      }
+      Class<?> resultClass = Class.forName(P2_QUERY_RESULT_CLASS, false, P2CacheProbe.classLoader)
+      Object result = readObject(content, resultClass.classLoader)
+      if (!resultClass.isInstance(result)) {
+        return false
+      }
+      Collection<?> jars = result.getJarsNotOnMavenCentral() as Collection<?>
+      return jars != null && jars.every { it instanceof File && ((File) it).exists() }
+    } catch (Exception | LinkageError e) {
+      // never fail the build because of the probe
+      return false
+    }
+  }
+
+  private static Object readObject(File file, ClassLoader loader) {
+    file.withInputStream { InputStream is ->
+      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is)) {
+          @Override
+          protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+            try {
+              return Class.forName(desc.name, false, loader)
+            } catch (ClassNotFoundException e) {
+              return super.resolveClass(desc)
+            }
+          }
+        }
+      ois.objectInputFilter = ObjectInputFilter.Config.createFilter(DESERIALIZATION_FILTER)
+      ois.readObject()
+    }
   }
 
   /**
