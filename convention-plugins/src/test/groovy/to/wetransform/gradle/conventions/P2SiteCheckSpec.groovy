@@ -96,6 +96,27 @@ class P2SiteCheckSpec extends Specification {
     !new P2SiteCheck().check(start()).healthy
   }
 
+  def 'p2 index with whitespace around the separator is healthy'() {
+    given:
+    server.createContext('/') { ex ->
+      respond(ex, 200, 'text/plain', 'version=1\nmetadata.repository.factory.order = content.xml,\\!\n'.bytes)
+    }
+
+    expect:
+    new P2SiteCheck().check(start()).healthy
+  }
+
+  def 'p2 index metadata entry without separator comma is unhealthy'() {
+    given:
+    // Solstice cannot parse the metadata entry without the trailing comma
+    server.createContext('/') { ex ->
+      respond(ex, 200, 'text/plain', 'version=1\nmetadata.repository.factory.order=content.xml\n'.bytes)
+    }
+
+    expect:
+    !new P2SiteCheck().check(start()).healthy
+  }
+
   def 'missing p2 index falls back to content jar'() {
     given:
     server.createContext('/') { ex ->

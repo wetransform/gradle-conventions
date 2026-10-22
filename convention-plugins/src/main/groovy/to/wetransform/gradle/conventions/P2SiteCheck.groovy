@@ -15,6 +15,8 @@
  */
 package to.wetransform.gradle.conventions
 
+import java.util.regex.Pattern
+
 /**
  * Checks whether a P2 update site is actually serving P2 content, as opposed to
  * an HTML maintenance page served with HTTP 200.
@@ -38,6 +40,9 @@ class P2SiteCheck {
 
   private static final int MAX_BODY = 64 * 1024
 
+  /** Same pattern Solstice uses to read the metadata entry of a p2.index ({@code P2Client}). */
+  private static final Pattern P2_METADATA = Pattern.compile('metadata\\.repository\\.factory\\.order\\s*=(.*),')
+
   private final int connectTimeoutMs
   private final int readTimeoutMs
 
@@ -52,7 +57,7 @@ class P2SiteCheck {
       String indexUrl = base + 'p2.index'
       Response index = get(indexUrl)
       if (index.ok) {
-        if (new String(index.body, 'UTF-8').contains('metadata.repository.factory.order=')) {
+        if (P2_METADATA.matcher(new String(index.body, 'UTF-8')).find()) {
           return new Result(true, "${indexUrl}: ${index.describe()}")
         }
         return new Result(false, "${indexUrl}: ${index.describe()} without p2 metadata")
