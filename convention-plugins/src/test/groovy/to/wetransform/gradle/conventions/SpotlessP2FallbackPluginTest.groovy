@@ -290,6 +290,46 @@ class SpotlessP2FallbackPluginTest extends PluginTest {
     indexRequests.values().every { it.get() == 1 }
   }
 
+  def "auto mode recovers from an outage despite configuration cache"() {
+    given:
+    boolean originalHealthy = false
+    startServer({ String path ->
+      originalHealthy && path.startsWith('/eclipse/updates/') && path.endsWith('/p2.index') ? validIndex() : html()
+    })
+    // no groovy plugin: the Eclipse JDT step of spotlessJava prevents configuration cache reuse (independent of P2 mode)
+    // help instead of spotless tasks: the test URLs only affect the health check, spotless would provision from the real sites
+    buildFile << """
+    plugins {
+      id 'to.wetransform.conventions.spotless'
+    }
+    """.stripIndent()
+    def args = p2Args('--configuration-cache')
+
+    when: 'the original site and the mirror are down'
+    def outage = runTask('help', args)
+
+    then:
+    outage.output.contains(WARNING)
+
+    when: 'the original site is back, nothing else changed'
+    originalHealthy = true
+    def recovered = runTask('help', args)
+
+    then: 'the cached configuration is discarded and greclipse is no longer skipped'
+    recovered.output.contains('configuration cache cannot be reused')
+    recovered.output.contains(P2SourceValueSource.simpleName)
+    !recovered.output.contains(WARNING)
+
+    when: 'nothing changed'
+    def indexRequests = server.requests.findAll { k, v -> k.startsWith('/eclipse/updates/') }.values()*.get().sum()
+    def unchanged = runTask('help', args)
+
+    then: 'the configuration cache is reused, but the site is checked again'
+    unchanged.output.contains('Reusing configuration cache')
+    !unchanged.output.contains(WARNING)
+    server.requests.findAll { k, v -> k.startsWith('/eclipse/updates/') }.values()*.get().sum() > indexRequests
+  }
+
   def "skip warning is printed again on configuration cache hit"() {
     given:
     startServer()
