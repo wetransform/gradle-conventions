@@ -51,17 +51,18 @@ class P2SiteCheck {
     try {
       String indexUrl = base + 'p2.index'
       Response index = get(indexUrl)
-      if (index.status < 400 || index.status > 499) {
-        if (!index.ok) {
-          return new Result(false, "${indexUrl}: ${index.describe()}")
-        }
+      if (index.ok) {
         if (new String(index.body, 'UTF-8').contains('metadata.repository.factory.order=')) {
           return new Result(true, "${indexUrl}: ${index.describe()}")
         }
         return new Result(false, "${indexUrl}: ${index.describe()} without p2 metadata")
       }
+      if (!indexMissing(index)) {
+        return new Result(false, "${indexUrl}: ${index.describe()}")
+      }
 
-      String last = "${indexUrl}: HTTP ${index.status}"
+      // like Solstice, guess the repository files if there is no p2.index
+      String last = "${indexUrl}: ${index.describe()}"
       for (String name : [
           'compositeContent.jar',
           'content.jar'
@@ -79,13 +80,32 @@ class P2SiteCheck {
     }
   }
 
+  /**
+   * Whether Solstice treats the p2.index as missing and guesses the repository files ({@code P2Client.getBytes}):
+   * on HTTP 404, or on an HTML error page with another status except 502.
+   * An HTML page with HTTP 200 is not treated as missing, since spotless still fails on it in practice
+   * (e.g. the maintenance page of download.eclipse.org).
+   */
+  private static boolean indexMissing(Response index) {
+    index.status == 404 || (index.status != 200 && index.status != 502 && index.html)
+  }
+
   private static class Response {
     int status
     String contentType
     byte[] body
 
     boolean isOk() {
-      status == 200 && !(contentType ?: '').toLowerCase(Locale.ROOT).startsWith('text/html')
+      status == 200 && !htmlContentType
+    }
+
+    boolean isHtmlContentType() {
+      (contentType ?: '').toLowerCase(Locale.ROOT).startsWith('text/html')
+    }
+
+    /** HTML by content type or, like Solstice, by a body starting with {@code <!DOCTYPE html}. */
+    boolean isHtml() {
+      htmlContentType || new String(body, 'UTF-8').stripLeading().toLowerCase(Locale.ROOT).startsWith('<!doctype html')
     }
 
     String describe() {
@@ -102,8 +122,13 @@ class P2SiteCheck {
       conn.requestMethod = 'GET'
       int status = conn.responseCode
       Response resp = new Response(status: status, contentType: conn.contentType, body: new byte[0])
-      if (status == 200) {
-        InputStream is = conn.inputStream
+      InputStream is = null
+      try {
+        is = status >= 400 ? conn.errorStream : conn.inputStream
+      } catch (IOException ignored) {
+        // no body
+      }
+      if (is != null) {
         try {
           ByteArrayOutputStream out = new ByteArrayOutputStream()
           byte[] buf = new byte[8192]
