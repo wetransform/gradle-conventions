@@ -1,3 +1,25 @@
+## [3.2.0](https://github.com/wetransform/gradle-conventions/compare/v3.1.0...v3.2.0) (2026-10-22)
+
+### Features
+
+* **spotless:** add P2 source decision logic ([4e0a398](https://github.com/wetransform/gradle-conventions/commit/4e0a3986475e937fdfe078b935e113cbcc955015))
+* **spotless:** add P2 update site health check ([c4722c7](https://github.com/wetransform/gradle-conventions/commit/c4722c7d08a5cdfe6dc2ab3d5be64a55ba81d934))
+* **spotless:** fall back to P2 mirror or skip greclipse when Eclipse download site is unavailable ([cab2d20](https://github.com/wetransform/gradle-conventions/commit/cab2d2071e9b818490d40354cdd56f7a6288745e))
+* **spotless:** skip P2 health check when local P2 cache is warm ([6362774](https://github.com/wetransform/gradle-conventions/commit/636277421ce19d35fae5bc7be07d674787aed64c))
+
+### Bug Fixes
+
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.10.0 ([395f152](https://github.com/wetransform/gradle-conventions/commit/395f152ce548a68c80c55b0dec4c4e636a5d5285))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.10.2 ([f70d098](https://github.com/wetransform/gradle-conventions/commit/f70d098324740474d1960f46d2c2d373a22333a7))
+* **deps:** update dependency com.diffplug.spotless:spotless-plugin-gradle to v8.10.4 ([bcb681c](https://github.com/wetransform/gradle-conventions/commit/bcb681c1ac9cf19e4c79f9446b4cd7eda42571c8))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.6.0 ([ebe607a](https://github.com/wetransform/gradle-conventions/commit/ebe607ae538a8509f834d4172c0f1cd5cc4fd507))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.7.0 ([703b66c](https://github.com/wetransform/gradle-conventions/commit/703b66c0707048398b375d45950f1eed381b643b))
+* **deps:** update dependency io.github.wasabithumb:jtoml to v1.8.2 ([0eafee6](https://github.com/wetransform/gradle-conventions/commit/0eafee67aea9b5a2c463f1790dfa544b99ccd7df))
+* **spotless:** match Solstice when falling back from a missing p2.index ([29b40ab](https://github.com/wetransform/gradle-conventions/commit/29b40ab30ce6fbb22a6c9fc949eaee275b21756b))
+* **spotless:** only treat P2 cache as warm when cached jars exist ([6809d20](https://github.com/wetransform/gradle-conventions/commit/6809d20f6d6eaf7caac355ba462e73810f0ceb03))
+* **spotless:** parse p2.index metadata entry like Solstice ([1ab0353](https://github.com/wetransform/gradle-conventions/commit/1ab03539682bbcef6756d49d90d6d8058dbec2d5))
+* **spotless:** print P2 skip warning before any spotless task runs ([d06d744](https://github.com/wetransform/gradle-conventions/commit/d06d7446960c735dedbda8e0ee91016d7b862a3a))
+
 ## [3.1.0](https://github.com/wetransform/gradle-conventions/compare/v3.0.0...v3.1.0) (2026-08-20)
 
 ### Features
