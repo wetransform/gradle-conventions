@@ -4,8 +4,8 @@ Date: 2026-10-22. Scratch project: `p2-spike` in the session scratchpad, applyin
 with `groovyGradle { greclipse() }`, Gradle 9.8.1, Java 17 (Temurin 17.0.20).
 Resolved libs: `spotless-lib-extra` 4.10.4 (contains `GrEclipseFormatterStep`, `EquoBasedStepBuilder`).
 
-Environment limits: the sandbox proxy returns `403 ERR_ACCESS_DENIED` for `ftp.fau.de`, `ftp.halifax.rwth-aachen.de`
-and `mirror.ibcp.fr` (and other mirrors tried). So (e) could only be verified against a local simulated mirror, see (e).
+Environment: the sandbox proxy initially blocked the three mirror hosts; the user then allowed them and (e) was verified against the real mirrors (see (e), "Real mirrors"),
+after an earlier verification of the mechanism with a local fake mirror.
 `download.eclipse.org` is still in outage: `p2.index` returns an HTML "Temporary shutdown" page (HTTP 200, `text/html`).
 
 ## (a) `GrEclipseFormatterStep.defaultVersion()`
@@ -58,6 +58,8 @@ and `mirror.ibcp.fr` (and other mirrors tried). So (e) could only be verified ag
      is not used when the default `download.eclipse.org` URLs are configured, and vice versa.
   3. I could not warm the cache with the real default URLs because `download.eclipse.org/.../p2.index` is broken today. The warm/offline
      test therefore used the simulated mirror URLs (`http://127.0.0.1:8094/...`) for both runs. The mechanism is URL-independent.
+     The later real-mirror runs did produce warm query dirs for real (mirrored) URLs (`queries/1.8.2-1092931831` fau, `1.8.21852791274` halifax, `1.8.2-1896980745` ibcp), but the offline re-run
+     was not repeated against them.
 - Evidence: warm run (cold GUH, mirror up) printed formatting violations (i.e. formatter ran), 43 requests to the mirror.
   Then the mirror was dead (connection refused) and the JVM proxy pointed to a dead port (`-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=9`),
   `./gradlew --offline spotlessGroovyGradleCheck` ran in 0.5s with the same violations report and no further mirror requests (request log unchanged).
@@ -78,9 +80,9 @@ and `mirror.ibcp.fr` (and other mirrors tried). So (e) could only be verified ag
 
 ## (e) Mirror end to end
 
-- Result: UNVERIFIED for the three real candidates (blocked), VERIFIED for the mechanism with a local simulated mirror.
-- Evidence, real candidates: `curl -x http://localhost:3128 https://ftp.fau.de/` -> `HTTP/1.1 403 Forbidden ... X-Squid-Error: ERR_ACCESS_DENIED`; the same for
-  `ftp.halifax.rwth-aachen.de` and `mirror.ibcp.fr`. Domains the user needs to allow to finish this: `ftp.fau.de`, `ftp.halifax.rwth-aachen.de`, `mirror.ibcp.fr`.
+- Result: VERIFIED. All three real candidates work, in this order, as the built-in list: `https://ftp.fau.de/eclipse`, `https://ftp.halifax.rwth-aachen.de/eclipse`, `https://mirror.ibcp.fr/pub/eclipse`.
+  The mechanism was first verified with a local simulated mirror (below), then (proxy later opened by the user) with the real mirrors (section "Real mirrors").
+- Evidence, real candidates: all three serve a real `p2.index` (HTTP 200, 158 bytes) and cold Gradle runs succeed; details in "Real mirrors" below.
   `archive.eclipse.org` is allowed but is the same infrastructure and returns the same shutdown page, so it is no mirror.
 - Evidence, mechanism: a local HTTP server on `127.0.0.1` forwards to `download.eclipse.org` / `groovy.jfrog.io` (it serves a hand-written `p2.index` per repo, converts `*.xml` requests to the upstream `*.jar`), see the worked example below.
   Earlier runs (warm proxy, default `GRADLE_USER_HOME`/`user.home` variations) already succeeded cold with 43 mirror requests and formatter output (format violations of the scratch `build.gradle`).
@@ -99,21 +101,52 @@ and `mirror.ibcp.fr` (and other mirrors tried). So (e) could only be verified ag
   Stock Eclipse mirrors (`/eclipse/updates/<ver>/`) do this normally.
 - Extra finding: during today's outage only `p2.index` (and HTML pages) are broken on `download.eclipse.org`; `compositeContent.jar`, child `content.jar`,
   `artifacts.jar` and `plugins/*.jar` are served normally (HTTP 200, java-archive). Spotless still fails because Solstice needs `p2.index`.
-- Worked example (convention used by the plan: key `https://download.eclipse.org/eclipse/updates/` -> value `<mirrorBase>/eclipse/updates/`). Exact map used in the final cold run
+- Worked example, LOCAL-FAKE variant (the real-mirror map follows right after; it differs only in `mirrorBase` and in the jfrog value). Convention used by the plan:
+  key `https://download.eclipse.org/eclipse/updates/` -> value `<mirrorBase>/eclipse/updates/`. Exact map used in the dead-proxy cold run
   (`build.gradle`: `greclipse().withP2Mirrors(mirrors)`), with `mirrorBase = http://127.0.0.1:8092/eclipse`:
   ```groovy
   [ 'https://download.eclipse.org/eclipse/updates/': 'http://127.0.0.1:8092/eclipse/eclipse/updates/',
-    'https://groovy.jfrog.io/artifactory/plugins-release': 'http://127.0.0.1:8092/jfrog' ]   // jfrog also routed via the local fake; the plan's identity mapping value would be the same URL as the key
+    'https://groovy.jfrog.io/artifactory/plugins-release': 'http://127.0.0.1:8092/jfrog' ]   // local-fake only: jfrog routed via the fake so nothing external is reached directly
   ```
+  REAL-MIRROR variant, actually used for the three real mirror runs (jfrog identity mapping, as in the plan), here with `mirrorBase = https://ftp.fau.de/eclipse`:
+  ```groovy
+  [ 'https://download.eclipse.org/eclipse/updates/': 'https://ftp.fau.de/eclipse/eclipse/updates/',
+    'https://groovy.jfrog.io/artifactory/plugins-release': 'https://groovy.jfrog.io/artifactory/plugins-release' ]
+  ```
+  (identity mapping on the jfrog repo URL prefix as printed by `getP2repo()`; keying on `https://groovy.jfrog.io/` alone was not tested.)
   Resulting requests (from the fake mirror's log): `GET /eclipse/eclipse/updates/4.41/p2.index`, `.../compositeContent.xml.xz`, `.../compositeContent.jar`,
   `.../R-4.41-202608281142/p2.index`, `.../R-4.41-202608281142/content.xml.xz`, `.../R-4.41-202608281142/plugins/*.jar`, `GET /jfrog/org/codehaus/groovy/groovy-eclipse-integration/6.3.0/e4.41/p2.index`, `.../content.xml.xz`.
-  For ftp.fau.de the analogous map value would be `https://ftp.fau.de/eclipse/eclipse/updates/`, giving the request `https://ftp.fau.de/eclipse/eclipse/updates/4.41/p2.index`.
-  The REAL mirrors' directory layout is UNVERIFIED: the proxy answers 403 (`ERR_ACCESS_DENIED`) for them, which says nothing about their layout. It must be confirmed with curl once allowed.
+  Request URL example for the real fau mirror: `https://ftp.fau.de/eclipse/eclipse/updates/4.41/p2.index` (verified, see "Real mirrors").
   (Earlier runs used the shorter key `https://download.eclipse.org` with value `http://127.0.0.1:P/eclipse`, which produces the same request URLs.)
 - Consequence: keep all three candidates in the built-in list in the given order (`ftp.fau.de`, `ftp.halifax.rwth-aachen.de`, `mirror.ibcp.fr`) as the plan
-  has it; their validity must be confirmed once the proxy allows them (re-run `curl -s -o /dev/null -w '%{http_code}' <base>/eclipse/updates/4.41/p2.index`
-  and expect 200 with `text/plain`-ish content, not `text/html`). The health check should therefore test `p2.index` content, not just the HTTP status
+  has it; all three were verified working (see "Real mirrors"). The health check should therefore test `p2.index` content, not just the HTTP status
   (the outage page is status 200 `text/html`).
+
+### Real mirrors (after the proxy allowed them)
+
+Layout check, `curl <mirrorBase>/eclipse/updates/4.41/p2.index`, identical on all three: HTTP 200 (fau: `Server: Apache`, no Content-Type header shown; halifax/ibcp: HTTP/2, `application/octet-stream` where shown), 158 bytes, body:
+```
+#Wed Sep 09 11:55:54 UTC 2026
+artifact.repository.factory.order=compositeArtifacts.xml,\!
+metadata.repository.factory.order=compositeContent.xml,\!
+version=1
+```
+`<mirrorBase>/eclipse/updates/4.41/compositeContent.jar` is 200 `application/java-archive` 431 bytes on all three. The child repo `.../4.41/R-4.41-202608281142/p2.index` is also real on all three:
+`metadata.repository.factory.order=content.xml.xz,content.xml,\!`. So real Eclipse p2.index files (composite parent and child) DO contain `metadata.repository.factory.order=`.
+
+Gradle: cold `p2-data` (copy of the scratch GUH with `caches/p2-data` deleted, fresh `user.home`), normal proxy, map
+`['https://download.eclipse.org/eclipse/updates/': '<mirrorBase>/eclipse/updates/', 'https://groovy.jfrog.io/artifactory/plugins-release': 'https://groovy.jfrog.io/artifactory/plugins-release']` (jfrog identity), command
+`GRADLE_USER_HOME=<scratch>/guh-<n> ./gradlew spotlessGroovyGradleCheck --info -PmirrorBase=<mirrorBase>` while `download.eclipse.org/.../p2.index` still serves the HTML outage page.
+
+| mirrorBase | outcome | wall time | new `queries/` dir | bundle-pool repo dirs |
+| --- | --- | --- | --- | --- |
+| `https://ftp.fau.de/eclipse` | success (formatter ran, violations reported) | 9s | `1.8.2-1092931831` | `https-ftp.fau.de-eclipse-eclipse-updates-4.41-R-4.41-...`, jfrog |
+| `https://ftp.halifax.rwth-aachen.de/eclipse` | success | 9s | `1.8.21852791274` | `https-ftp.halifax.rwth-aachen.de-eclipse-...`, jfrog |
+| `https://mirror.ibcp.fr/pub/eclipse` | success | 12s | `1.8.2-1896980745` | `https-mirror.ibcp.fr-pub-eclipse-...`, jfrog |
+
+In each run the only `download.eclipse.org` string in the `--info` output was the scratch `build.gradle` text in the violations diff; the bundle-pool contains only the mirror and jfrog repos. Success while the origin's `p2.index` is
+broken proves the origin's p2.index was not used. The identity mapping for jfrog works with real hosts (jfrog reached directly).
+Gate outcome for (e): PASSES, mirror step is effective. The built-in list, in order: fau, halifax (rwth-aachen), ibcp.
 
 ## (f) Validity rule for the Groovy-Eclipse (jfrog) repo URL
 
