@@ -32,20 +32,31 @@ abstract class PluginTest extends Specification {
   }
 
   def runTask(String task, String... args) {
+    return runTask([:], task, args)
+  }
+
+  def runTask(Map<String, String> environment, String task, String... args) {
+    return createRunner(environment, task, args).build()
+  }
+
+  def runTaskWithFailure(String task, String... args) {
+    return runTaskWithFailure([:], task, args)
+  }
+
+  def runTaskWithFailure(Map<String, String> environment, String task, String... args) {
+    return createRunner(environment, task, args).buildAndFail()
+  }
+
+  GradleRunner createRunner(Map<String, String> environment, String task, String... args) {
     def arguments = [task, '--stacktrace'] + args.toList()
 
-    return GradleRunner.create()
+    def runner = GradleRunner.create()
       .withProjectDir(testProjectDir)
       .withArguments(arguments)
       .withPluginClasspath()
-      .build()
-  }
-
-  def runTaskWithFailure(String task) {
-    return GradleRunner.create()
-      .withProjectDir(testProjectDir)
-      .withArguments(task, '--stacktrace')
-      .withPluginClasspath()
-      .buildAndFail()
+    if (environment) {
+      runner = runner.withEnvironment(environment)
+    }
+    return runner
   }
 }
