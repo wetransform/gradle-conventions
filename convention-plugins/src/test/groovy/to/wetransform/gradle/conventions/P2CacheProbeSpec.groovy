@@ -31,10 +31,40 @@ class P2CacheProbeSpec extends Specification {
     'https://m3.example'
   ]
 
-  void warmQuery(String key) {
+  /**
+   * Creates a Solstice {@code P2QueryResult} without running a P2 query: its only constructor runs the query,
+   * so the instance is created like Java deserialization does and its private fields are set reflectively.
+   */
+  static Object queryResult(List<String> mavenCoordinates, List<File> downloadedP2Jars) {
+    Class<?> cls = Class.forName(P2CacheProbe.P2_QUERY_RESULT_CLASS)
+    def constructor = sun.reflect.ReflectionFactory.reflectionFactory
+      .newConstructorForSerialization(cls, Object.getDeclaredConstructor())
+    Object result = constructor.newInstance()
+    [mavenCoordinates: mavenCoordinates, downloadedP2Jars: downloadedP2Jars].each { name, value ->
+      def field = cls.getDeclaredField(name)
+      field.accessible = true
+      field.set(result, new ArrayList<>(value))
+    }
+    result
+  }
+
+  File queryContent(String key) {
     File dir = new File(p2Data, "queries/${key}")
     dir.mkdirs()
-    new File(dir, 'content').bytes = [1, 2, 3] as byte[]
+    new File(dir, 'content')
+  }
+
+  /** Creates a cached query referencing a P2 jar; returns the jar. */
+  File warmQuery(String key) {
+    File jar = new File(p2Data, "bundle-pool/${key}.jar")
+    jar.parentFile.mkdirs()
+    jar.bytes = [0x50, 0x4b, 3, 4] as byte[]
+    writeQuery(key, [jar])
+    jar
+  }
+
+  void writeQuery(String key, List<File> jars) {
+    queryContent(key).withObjectOutputStream { it.writeObject(queryResult(['org.example:lib:1.0'], jars)) }
   }
 
   def "p2 data dir is located in the Gradle user home"() {
@@ -82,6 +112,66 @@ class P2CacheProbeSpec extends Specification {
   def "query directory without content is not warm"() {
     given:
     new File(p2Data, 'queries/1.8.2-1').mkdirs()
+
+    expect:
+    !P2CacheProbe.isWarm(p2Data, '1.8.2-1')
+  }
+
+  def "cache is warm when all referenced jars exist"() {
+    given:
+    File other = new File(p2Data, 'other.jar').tap { it.bytes = [1] as byte[] }
+    writeQuery('1.8.2-1', [warmQuery('a'), other])
+
+    expect:
+    P2CacheProbe.isWarm(p2Data, '1.8.2-1')
+  }
+
+  def "cache without p2 jars is warm"() {
+    given:
+    writeQuery('1.8.2-1', [])
+
+    expect:
+    P2CacheProbe.isWarm(p2Data, '1.8.2-1')
+  }
+
+  def "cache referencing a missing jar is not warm and is left unchanged"() {
+    given:
+    File present = warmQuery('a')
+    writeQuery('1.8.2-1', [
+      present,
+      new File(p2Data, 'bundle-pool/missing.jar')
+    ])
+    File content = queryContent('1.8.2-1')
+    byte[] before = content.bytes
+
+    expect:
+    !P2CacheProbe.isWarm(p2Data, '1.8.2-1')
+    content.bytes == before
+    present.isFile()
+  }
+
+  def "corrupt cache content is not warm and is left unchanged"() {
+    given:
+    File content = queryContent('1.8.2-1')
+    content.bytes = [1, 2, 3] as byte[]
+
+    expect:
+    !P2CacheProbe.isWarm(p2Data, '1.8.2-1')
+    content.bytes == [1, 2, 3] as byte[]
+  }
+
+  def "cache content of another type is not warm"() {
+    given:
+    queryContent('1.8.2-1').withObjectOutputStream { it.writeObject(new ArrayList<>(['x'])) }
+
+    expect:
+    !P2CacheProbe.isWarm(p2Data, '1.8.2-1')
+  }
+
+  def "unreadable cache content is not warm"() {
+    given:
+    File content = queryContent('1.8.2-1')
+    content.mkdirs() // a directory instead of a file
 
     expect:
     !P2CacheProbe.isWarm(p2Data, '1.8.2-1')
