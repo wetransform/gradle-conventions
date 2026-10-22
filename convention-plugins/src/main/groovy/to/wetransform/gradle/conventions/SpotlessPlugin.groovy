@@ -28,6 +28,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.specs.Spec
 
 import com.diffplug.gradle.spotless.BaseKotlinExtension
 import com.diffplug.gradle.spotless.FormatExtension
@@ -42,10 +43,8 @@ class SpotlessPlugin implements Plugin<Project> {
   static final String PROPERTY_P2_ORIGINAL_BASE = 'wetf.spotless.p2.originalBase'
   /** Internal: overrides the Groovy-Eclipse repository URL for the health check only, used by tests. */
   static final String PROPERTY_P2_GRECLIPSE_REPO = 'wetf.spotless.p2.greclipseRepo'
-  static final List<String> P2_SKIP_WARNING_TASKS = [
-    'spotlessCheck',
-    'spotlessApply'
-  ]
+  /** Task printing the warning that greclipse is skipped; all spotless tasks depend on it. */
+  static final String TASK_P2_SKIP_WARNING = 'spotlessP2SkipWarning'
   static final String TASK_GENERATE_WATCHER = 'generateSpotlessWatcher'
   static final String TASK_GENERATE_SCRIPT = 'generateSpotlessScript'
   static final String SCRIPT_NAME_UNIX = 'spotless.sh'
@@ -304,14 +303,21 @@ class SpotlessPlugin implements Plugin<Project> {
       }
     }
     def action = new SkipWarningAction(message, annotation, once)
-    // configureEach does not force the realization of other tasks
-    project.tasks.configureEach { Task task ->
-      if (task.name in P2_SKIP_WARNING_TASKS) {
-        if (once != null) {
-          task.usesService(once)
-        }
-        task.doFirst(action)
+    // a dedicated task without outputs always runs, also on configuration cache hits,
+    // and as a dependency it runs before any spotless task, even if one of them fails
+    def warningTask = project.tasks.register(TASK_P2_SKIP_WARNING) { Task task ->
+      task.description = 'Prints a warning that Groovy and Gradle files are not formatted with greclipse'
+      if (once != null) {
+        task.usesService(once)
       }
+      task.doLast(action)
+    }
+    // per-format tasks (spotlessX, spotlessXCheck, spotlessXApply) and the aggregates (spotlessCheck, spotlessApply);
+    // filtering by name does not force the realization of other tasks
+    project.tasks.named({ String name ->
+      name.startsWith('spotless') && name != TASK_P2_SKIP_WARNING
+    } as Spec<String>).configureEach { Task task ->
+      task.dependsOn(warningTask)
     }
   }
 
@@ -342,8 +348,20 @@ class SpotlessPlugin implements Plugin<Project> {
     @Override
     void execute(Task task) {
       task.logger.warn(message)
-      if (annotation != null && (once == null || once.get().first())) {
+      if (annotation != null && firstAnnotation()) {
         task.logger.warn(annotation)
+      }
+    }
+
+    private boolean firstAnnotation() {
+      if (once == null) {
+        return true
+      }
+      try {
+        return once.get().first()
+      } catch (Exception | LinkageError e) {
+        // never fail the build because of the warning; rather emit the annotation more than once
+        return true
       }
     }
   }

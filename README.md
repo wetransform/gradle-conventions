@@ -210,7 +210,7 @@ The behaviour can be forced with `-Pwetf.spotless.p2.mode=<mode>`:
 - `skip`: do not apply the Groovy-Eclipse formatter
 
 The mirrors can be configured with `-Pwetf.spotless.p2.mirrors=<comma-separated mirror base URLs>`, e.g. `https://ftp.fau.de/eclipse`.
-When formatting is skipped, a warning is printed at configuration time and, also on configuration cache hits, when `spotlessCheck`/`spotlessApply` run (plus a warning annotation on GitHub Actions).
+When formatting is skipped, a warning is printed at configuration time and, also on configuration cache hits, by the task `spotlessP2SkipWarning`, which runs before any spotless task (plus a warning annotation on GitHub Actions, once per build).
 
 #### General use of spotless
 
