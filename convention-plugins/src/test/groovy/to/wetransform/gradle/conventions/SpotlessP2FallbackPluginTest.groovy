@@ -310,6 +310,74 @@ class SpotlessP2FallbackPluginTest extends PluginTest {
     result.output.contains('Reason: forced via wetf.spotless.p2.mode=skip')
   }
 
+  def "skip warning is printed on configuration cache hit when a check fails first"() {
+    given:
+    startServer()
+    buildFile << """
+    plugins {
+      id 'to.wetransform.conventions.spotless'
+    }
+    """.stripIndent()
+    new File(testProjectDir, '.editorconfig') << """
+    root = true
+
+    [*.md]
+    trim_trailing_whitespace = true
+    """.stripIndent()
+    new File(testProjectDir, 'README.md') << 'Trailing whitespace   \n'
+    def args = p2Args('-Pwetf.spotless.p2.mode=skip', '--configuration-cache')
+
+    when:
+    runTaskWithFailure('spotlessCheck', args)
+    def result = runTaskWithFailure('spotlessCheck', args)
+
+    then:
+    result.output.contains('Reusing configuration cache')
+    result.task(':spotlessOtherCheck').outcome == TaskOutcome.FAILED
+    result.task(':spotlessP2SkipWarning').outcome == TaskOutcome.SUCCESS
+    result.output.contains(WARNING)
+    result.output.indexOf(WARNING) < result.output.indexOf('README.md')
+  }
+
+  def "skip warning is printed on configuration cache hit when a single format task runs"() {
+    given:
+    startServer()
+    buildFile << """
+    plugins {
+      id 'to.wetransform.conventions.spotless'
+    }
+    """.stripIndent()
+    def args = p2Args('-Pwetf.spotless.p2.mode=skip', '--configuration-cache')
+
+    when:
+    runTask('spotlessGroovyGradleCheck', args)
+    def result = runTask('spotlessGroovyGradleCheck', args)
+
+    then:
+    result.output.contains('Reusing configuration cache')
+    result.task(':spotlessP2SkipWarning').outcome == TaskOutcome.SUCCESS
+    result.task(':spotlessCheck') == null
+    result.output.contains(WARNING)
+    result.output.contains('Reason: forced via wetf.spotless.p2.mode=skip')
+  }
+
+  def "no skip warning task when greclipse is applied"() {
+    given:
+    startServer()
+    buildFile << """
+    plugins {
+      id 'to.wetransform.conventions.spotless'
+    }
+    """.stripIndent()
+
+    when:
+    def result = runTask('spotlessGroovyGradleCheck', p2Args('-Pwetf.spotless.p2.mode=original', '--dry-run'))
+
+    then:
+    !result.output.contains('spotlessP2SkipWarning')
+    !result.output.contains(WARNING)
+  }
+
   def "github actions annotation in skip mode"() {
     given:
     startServer()
