@@ -62,15 +62,34 @@ class GrEclipseRepos {
     GrEclipseFormatterStep.defaultVersion()
   }
 
-  /** All P2 repository URLs of the Groovy-Eclipse formatter for the given Eclipse version. */
-  static List<String> repoUrls(String eclipseVersion) {
+  /** The P2 model (dev.equo.solstice.p2.P2Model) of the Groovy-Eclipse formatter, without mirrors. */
+  private static Object model(String eclipseVersion) {
     Provisioner provisioner = { boolean withTransitives, Collection<String> mavenCoordinates ->
       throw new IllegalStateException('Provisioning is not supported here')
     } as Provisioner
     def builder = GrEclipseFormatterStep.createBuilder(provisioner, P2Provisioner.createDefault())
     // model(String) is protected, Groovy allows to call it dynamically
-    def model = builder.model(eclipseVersion)
-    model.getP2repo() as List<String>
+    builder.model(eclipseVersion)
+  }
+
+  /** All P2 repository URLs of the Groovy-Eclipse formatter for the given Eclipse version. */
+  static List<String> repoUrls(String eclipseVersion) {
+    model(eclipseVersion).getP2repo() as List<String>
+  }
+
+  /**
+   * Name of the Solstice query cache directory for the formatter with the given mirrors applied,
+   * as spotless and Solstice compute it ({@code EquoBasedStepBuilder.createModelWithMirrors}, {@code QueryCacheOnDisk}).
+   */
+  static String queryCacheKey(String eclipseVersion, Map<String, String> mirrorMap) {
+    def model = model(eclipseVersion)
+    Collection<String> repos = model.getP2repo()
+    List<String> mirrored = P2CacheProbe.applyMirrors(repos, mirrorMap)
+    repos.clear()
+    repos.addAll(mirrored)
+    // the version of the Solstice library actually used, as part of the cache key
+    def nestedJars = Class.forName('dev.equo.solstice.NestedJars', true, model.getClass().classLoader)
+    P2CacheProbe.queryKey(nestedJars.solsticeVersion() as String, model.hashCode())
   }
 
   /** The Groovy-Eclipse repository URL, i.e. the one not hosted on download.eclipse.org. */

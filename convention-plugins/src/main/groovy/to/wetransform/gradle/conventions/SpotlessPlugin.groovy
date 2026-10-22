@@ -222,15 +222,20 @@ class SpotlessPlugin implements Plugin<Project> {
     def providers = project.providers
     // validate early for a clear error message
     P2Mode mode = P2Mode.parse(providers.gradleProperty(PROPERTY_P2_MODE).getOrNull())
-    String originalBase = providers.gradleProperty(PROPERTY_P2_ORIGINAL_BASE).getOrElse(P2SourceDecider.ORIGINAL_BASE)
+    String originalBaseOverride = providers.gradleProperty(PROPERTY_P2_ORIGINAL_BASE).getOrNull()
+    String originalBase = originalBaseOverride ?: P2SourceDecider.ORIGINAL_BASE
     List<String> mirrors = P2SourceDecider.parseMirrors(providers.gradleProperty(PROPERTY_P2_MIRRORS).getOrNull())
 
     // Eclipse version and Groovy-Eclipse repository are only needed for the health check
     String eclipseVersion = ''
     String greclipseRepoUrl = ''
     String lookupFailure = null
+    // the local P2 cache only matches the real repositories, so it is not probed with test overrides
+    boolean probeCache = false
     if (mode == P2Mode.AUTO) {
-      GrEclipseRepos.Info info = GrEclipseRepos.lookup(providers.gradleProperty(PROPERTY_P2_GRECLIPSE_REPO).getOrNull())
+      String greclipseRepoOverride = providers.gradleProperty(PROPERTY_P2_GRECLIPSE_REPO).getOrNull()
+      probeCache = originalBaseOverride == null && greclipseRepoOverride == null
+      GrEclipseRepos.Info info = GrEclipseRepos.lookup(greclipseRepoOverride)
       lookupFailure = info.failure
       eclipseVersion = info.eclipseVersion ?: ''
       greclipseRepoUrl = info.greclipseRepoUrl ?: ''
@@ -251,14 +256,17 @@ class SpotlessPlugin implements Plugin<Project> {
         spec.parameters.mirrors.set(mirrors)
         spec.parameters.eclipseVersion.set(eclipseVersion)
         spec.parameters.greclipseRepoUrl.set(greclipseRepoUrl)
-        spec.parameters.cacheWarm.set(false)
+        spec.parameters.offline.set(project.gradle.startParameter.offline)
+        if (probeCache) {
+          spec.parameters.p2DataDir.set(P2CacheProbe.p2DataDir(project.gradle.gradleUserHomeDir).absolutePath)
+        }
       }.get()
     }
     rootExt.set(key, encoded)
 
     P2Source source = P2Source.decode(encoded)
     if (source.kind == P2Source.Kind.MIRROR) {
-      project.logger.lifecycle("Spotless: download.eclipse.org unavailable, using P2 mirror ${source.mirrorBase}")
+      project.logger.lifecycle("Spotless: using P2 mirror ${source.mirrorBase} (${source.reason})")
     } else if (source.kind == P2Source.Kind.SKIP) {
       project.logger.warn(skipWarningBlock(source.reason))
     }
